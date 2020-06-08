@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    {% load static %}
+    {% load bootstrap4 %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% bootstrap_css %}         {# Embed Bootstrap CSS #}
+    {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
+    <script src="https://use.fontawesome.com/c560c025cf.js"></script>
+   <title>{% block title %}Babord + - vos paniers{% endblock %}</title>
+
+</head>
+<body>
+    <!-- <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+            <h4 class="my-0 mr-md-auto font-weight-normal">
+                <a class="p-2 text-dark" href="/">
+                Outils du SCOOP</a>
+            </h4>
+            <nav class="my-2 my-md-0 mr-md-3">
+                {% block nav %}
+                <a class="p-2 text-dark" href="/lecteurs/recherche-lecteur">Gestion des lecteurs</a>
+                {% endblock %}
+            </nav>
+    </div> -->
+   <div class="container">
+        {% include 'messages.html' %}
+       {% block content %}{% endblock %}
+   </div>
+<footer></footer>
+</body>
+</html>
