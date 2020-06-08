@@ -34,7 +34,7 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 # Application definition
 
 INSTALLED_APPS = [
-    'grappelli',
+    # 'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -73,6 +73,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'common_utils': 'cart_management.templatetags.utils',
+            },
         },
     },
 ]

@@ -128,8 +128,8 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
     send_mail(
         "{} : Votre commande est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
         "Vos documents pourront être retirés à la {} le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
-        user.email,
-        [pickup_loc.email],
+        pickup_loc.email,
+        [user.email],
         fail_silently=False,
     )
     #5 - On regarde s'il reste des paniers à valider

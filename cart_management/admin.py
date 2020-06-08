@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import PickupLocation,Person,Items, Appointment
 
+
 admin.site.register(PickupLocation)
 admin.site.register(Person)
 
