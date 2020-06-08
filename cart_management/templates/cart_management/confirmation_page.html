@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+    <div class="jumbotron">
+        <h1 class="display-4">Votre demande a bien était prise en compte.</h1>
+        <p class="lead">Vous pourrez retirer vos documents à la {{ pickup_loc.name }} le {{ date_rdv_in_date|date:"D d M Y" }} à {{ date_rdv_in_date|date:"H:i" }}. 
+        Munissez vous de votre carte de lecteur ou à défaut d'un justificatif d'identité.</p>
+        <hr class="my-4">
+        {% if other_cart_list|length > 0 %}
+        <p>Mais ce n'est pas fini ! Vous avez réservé des documents dans d'autres bibliothèques. Merci de valider le(s) panier(s) restant(s).</p>
+        {% for cart in other_cart_list %}
+        <a class="btn btn-primary btn-lg" href="{% url 'cart-validation' cart.pickuplocation %}" role="button">{{ cart.pickuplocation__name }}
+                <span class="badge badge-light">{{ cart.total }}</span>
+        </a>
+        {% endfor %}
+        {% else %}
+        <p>Vous pouvez reprendre une activité normale</p>
+        <a class="btn btn-primary btn-lg" 
+        href="https://babordplus.hosted.exlibrisgroup.com/primo-explore/search?vid=33PUDB_{{ institution_id }}_VU1&sortby=rank&lang=fr_FR" role="button">
+        Retourner sur Babord +
+        </a>
+        {% endif %}
+    </div>
+{% endblock %}

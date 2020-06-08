@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ identifiant }}{% endblock %}
+{% block content %}
+<div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h1 class="display-4"> {{ pickup_loc.name }} </h1>
+</div>
+<div class="container">
+        <div class="card shopping-cart">
+            <div class="card-header bg-dark text-light">
+                <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                Votre panier
+                <a href="" class="btn btn-outline-info btn-sm pull-right">Continuer votre sélection</a>
+                <div class="clearfix"></div>
+            </div>
+            <div class="card-body">
+                    {% for user_request in user_requests_list %}
+
+                    <div class="row">
+                            <div class="col-12 text-sm-center col-sm-12 text-md-left col-md-8">
+                                <h4 class="product-name"><strong>{{ user_request.title }}</strong></h4>
+                                <h4>
+                                    <small>{{ user_request.call_number }}</small>
+                                </h4>
+                            </div>
+                            <div class="col-12 col-sm-12 text-sm-center col-md-4 text-md-right row">
+                                <div class="col-3 col-sm-3 col-md-6 text-md-right" style="padding-top: 5px">
+                                    <h6><strong></strong></h6>
+                                </div>
+                                <div class="col-4 col-sm-4 col-md-4">
+                            
+                                </div>
+                                <div class="col-2 col-sm-2 col-md-2 text-right">
+                                    <form name="form_request_delation" action="{% url 'request-delation' user_request.user_request_id pickup_loc.institution pickup_loc.id_alma %}" onclick="return confirm('Retirer le titre {{user_request.title}} de votre panier?');" method="get" class="form">
+                                        <button type="submit" id="button_request_delation"class="btn btn-outline-danger btn-xs"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                    </div>
+                    {% endfor %}
+                    <!-- List group -->
+            </div>
+        </div>
+{% include './resa.html' %}
+</div>
+{% endblock %}

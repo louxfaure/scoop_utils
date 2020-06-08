@@ -1,0 +1,37 @@
+<div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Chosissez la date de retrait de vos ouvrages </h1>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseRdv" aria-expanded="true" aria-controls="collapseRdv">
+        Afficher les plages disponibles
+      </button>
+</div>
+<div class="collapse" id="collapseRdv">
+<table class="table table-striped">
+    <thead>
+        <tr>
+            {% for day in resas.list_days %}
+            <th scope="col">{{ day|date:"D d M Y" }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for hours in list_hours %}
+        <tr>
+            {% for hour in hours  %}
+                {% if hour == "-" %}
+            <td>{{ hour }}</td>
+                {% else %}
+            <td>
+                <form name="form_submit_rdv" action="{% url 'rdv' pickup_loc_id user_id hour %}" onclick="return confirm('Retirer votre commande le {{ hour|date:"D d M Y" }} à {{ hour|time:"H:i" }} ?');" method="get" class="form">
+                    <button type="submit" id="button_submit_rdv"class="btn btn-success btn-xs">{{ hour|time:"H:i" }}</button>
+                </form>                                    
+                <!-- <a class="btn btn-success btn-xs" href="{% url 'rdv' pickup_loc user_id hour %}">
+                {{ hour|time:"H:i" }}
+                </a> -->
+            </td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h2 class="display-4">Date et lieu de retrait</h2>
+        <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <th>Lieu de retrait</th>
+                        <td>{{ pickup_loc.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Jour</th>
+                        <td>{{ date_rdv_in_date|date:"D d M Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Heure</th>
+                        <td>{{ date_rdv_in_date|date:"H:i" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        <h2 class="display-4">Informations usager</h2>
+        <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <th>Nom</th>
+                        <td>{{ user.full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Code-barres</th>
+                        <td>{{ user.barcode }}</td>
+                    </tr>
+                    <tr>
+                        <th>Adresse email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        <h2 class="display-4">Liste des documents </h2>
+        <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Bibliothèque</th>
+                        <th scope="col">Localisation</th>
+                        <th scope="col">Cote</th>
+                        <th scope="col">Titre</th>
+                        <th scope="col">Description du fascicule demandé (Alma)</th>
+                        <th scope="col">Description du fascicule demandé (Usager)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for title in title_list %}
+                    <tr>
+                        <td>{{ title.library_name }}</td>
+                        <td>{{ title.location }}</td>
+                        <td>{{ title.call_number }}</td>
+                        <td>{{ title.title }}</td>
+                        <td>{{ title.description }}</td>
+                        <td>{{ title.manual_description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </body>
+</html>
