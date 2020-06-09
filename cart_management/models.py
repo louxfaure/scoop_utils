@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+# from django.utils.safestring import SafeString
 
 # Create your models here.
 class Person(models.Model):
@@ -69,14 +70,17 @@ class Cart(models.Model):
     )
 
 class Appointment(models.Model):
-    date =  models.DateTimeField()
+    date =  models.DateTimeField(verbose_name=u"Date de retrait des ouvrages")
     person = models.ForeignKey(
         Person,
         on_delete=models.CASCADE,
+        verbose_name=u"Lecteur",
+        related_name="person"
     )
     library = models.ForeignKey(
         PickupLocation,
         on_delete=models.CASCADE,
+        verbose_name=u"Bibliothèque de retrait"
     )
     class Meta:
         unique_together = (('date', 'library'),)

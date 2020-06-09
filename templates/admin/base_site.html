@@ -1,9 +1,13 @@
 {% extends "admin/base.html" %}
+{% load static %} 
 
-{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin')}}{%endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
-{% endblock %}
+<a href="{% url 'admin:index' %}" class="django-admin-logo">
+    <!-- Django Administration -->
+    <img height="64" src="{% static "/cart_management/Rebub_Favicon_Babordplus_white.svg" %}" alt="{{ site_header|default:_('Django administration') }}">
+</a>
+{% endblock branding %}
 
 {% block nav-global %}{% endblock %}

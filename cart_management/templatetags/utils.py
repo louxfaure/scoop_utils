@@ -2,6 +2,7 @@ from django import template
 from django.contrib import admin
 from django.urls import reverse
 from datetime import datetime
+import json
 from ..models import PickupLocation
 
 register = template.Library()
@@ -13,6 +14,7 @@ class CustomRequest:
 @register.simple_tag(takes_context=True)
 
 def get_app_list(context, **kwargs):
+    print(context)
     custom_request = CustomRequest(context['request'].user)
     app_list = admin.site.get_app_list(custom_request)
     return app_list

@@ -1,153 +1,213 @@
-{% load i18n static %}<!DOCTYPE html>
+{% load i18n static bootstrap_admin_template_tags  %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
-<title>{% block title %}{% endblock %}</title>
-<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %}</title>
+
+  {% block bootstrap_admin_css %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  {% endblock bootstrap_admin_css %}
+
+  <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static 'admin/css/base.css' %}{% endblock %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/css/datetime_widget.css' %}" />
+
 {% block extrastyle %}{% endblock %}
-{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
+
+{% if LANGUAGE_BIDI %}
+  {# PUT HERE YOUR CUSTOM RTL STYLESHEET #}
+  {% comment %}
+  <link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />
+  {% endcomment %}
+{% endif %}
+
+{% block jquery %}
+  <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+  <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+{% endblock jquery %}
+  <script>
+    (function ($) {
+      $(document).ready(function(){
+        $("#overlay").delay(600).fadeOut(500);
+      });
+    })(django.jQuery);
+  </script>
+  <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
+  <script type="text/javascript">window.__admin_utc_offset__ = "{% filter escapejs %}{% now "Z" %}{% endfilter %}";</script>
+
 {% block extrahead %}{% endblock %}
-{% block responsive %}
-    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive.css" %}">
-    {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive_rtl.css" %}">{% endif %}
-{% endblock %}
-{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
-{% load bootstrap4 %}
-{% bootstrap_css %}         {# Embed Bootstrap CSS #}
-    {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
-<style type=”text/css”>
-    .navbar ul li {
-        list-style-type: none;
-        padding: 0;
-    }    .navbar .dropdown-item {
-        width: auto;
-    }
-</style>
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
 </head>
 {% load i18n %}
+{% load common_utils %}
+{% display_sidebar_menu cl.has_filters as is_displaying_menu %}
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}{% if not is_displaying_menu %} no-sidebar{% endif %}" data-admin-utc-offset="{% now "Z" %}">
 
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
-  data-admin-utc-offset="{% now "Z" %}">
+  <div id="overlay">
+    <div class="spinner">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+  </div>
 
-<!-- Container -->
-<div id="container">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- <div class="col-sm-3 col-md-2 sidebar"> -->
+      {% if not is_popup %}
+        {% if is_displaying_menu %}
+          {% block sidebar_menu %}
 
-    {% if not is_popup %}
-    <!-- Header -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    {% block branding %}{% endblock %}
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+            <div id="sidebar-menu" class="col-xs-4 col-sm-3 col-md-2 sidebar-menu">
+              {% block branding %}
+                <a href="{% url 'admin:index' %}" class="django-admin-logo">
+                  <!-- Django Administration -->
+                  <img src="{% static "bootstrap_admin/img/logo-140x60.png" %}" alt="{{ site_header|default:_('Django administration') }}">
+                </a>
+              {% endblock branding %}
+              {% block filters %}{% endblock filters %}
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        {% load common_utils %}
-        {% get_app_list as all_app_list %}
-        {% if all_app_list %}
-            <ul class="navbar-nav mr-auto">
-                {% for app in all_app_list %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="{{ app.app_url }}" id="navbarDropdown"
-                           role="button" data-toggle="dropdown" aria-haspopup="true"
-                           aria-expanded="false">{{ app.name }}</a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% for model in app.models %}
-                                {% if model.admin_url %}
-                                    <a class="dropdown-item"
-                                       href="{{ model.admin_url }}">{{ model.name }}</a>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
+              {% if available_apps %}
+              {% for app in available_apps %}
+                <ul class="nav nav-sidebar app-{{ app.app_label }} module{% if app.app_url in current_url %} has-active-menu show-models{% endif %}">
+                  <li {% if app.app_url == current_url %} class="active"{% endif %}>
+                    <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
+                      {{ app.name }}
+                    </a>
+                  </li>
+                  {% for model in app.models %}
+                    <li {% if model.admin_url in current_url %}class="active"{% endif %}>
+                      <a href="{% firstof model.admin_url model.add_url '#' %}" title="{% if not model.admin_url and not model.add_url %}{% trans "You don't have permission to view or edit anything." %}{% endif %}">{{ model.name }}</a>
                     </li>
-                {% endfor %}
-            {% get_library_list as all_library_list %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="{{ app.app_url }}" id="navbarDropdown"
-                           role="button" data-toggle="dropdown" aria-haspopup="true"
-                           aria-expanded="false">Liste des plages de retrait par bibliothèque</a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+               {% get_library_list as all_library_list %}
+               <ul class="nav nav-sidebar">
+                    <li>
+                        <a href="#" class="section" title="Liste des plages de retrait par bibliothèque">
+                        Rendez-vous
+                        </a>
+                    </li>
                 {% for library in all_library_list %}
                     {% get_library_url library.id_alma as library_url %}
-                             <a class="dropdown-item"
-                                       href="{{ library_url }}">{{ library.name }}</a>
+                    <li>
+                      <a href="{% get_library_url library.id_alma %}" title="">{{ library.name }}</a>
+                    </li>
                 {% endfor %}
-                        </div>
-                    </li>
-            </ul>
-        {% elif user.is_authenticated %}
-            <span class="navbar-text">You don't have permission to edit anything.</span>
-        {% endif %}
-        {% block usertools %}
-            {% if has_permission %}
-                <ul class="navbar-nav my-2 my-lg-0">
-                    <li class="nav-item dropdown dropleft text-right">
-                        <a class="nav-link dropdown-toggle" href="#" id="nav-user-icon" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {% block welcome-msg %}
-                                <strong>{% firstof user.get_short_name user.get_username %}</strong>{% endblock %}
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="nav-user-icon">
-                            {% block userlinks %}
-                                {% if site_url %}
-                                    <a class="dropdown-item" href="{{ site_url }}">{% trans 'View site' %}</a>
-                                {% endif %}
-                                {% if user.is_active and user.is_staff %}
-                                    {% url 'django-admindocs-docroot' as docsroot %}
-                                    {% if docsroot %}
-                                        <a class="dropdown-item"
-                                           href="{{ docsroot }}">{% trans 'Documentation' %}</a>
-                                    {% endif %}
-                                {% endif %}
-                                {% if user.has_usable_password %}
-                                    <a class="dropdown-item"
-                                       href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a>
-                                {% endif %}
-                                <a class="dropdown-item"
-                                   href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>
-                            {% endblock %}
-                        </div>
-                    </li>
+
                 </ul>
+            {% else %}
+              <p class="permission-warning">{% trans "You don't have permission to view or edit anything." %}</p>
             {% endif %}
-        {% endblock %}
-        {% block nav-global %}{% endblock %}
-    </div>
-</nav>
-    <!-- END Header -->
-    {% block breadcrumbs %}
-    <div class="breadcrumbs">
-    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-    {% if title %} &rsaquo; {{ title }}{% endif %}
-    </div>
-    {% endblock %}
-    {% endif %}
 
-    {% block messages %}
-        {% if messages %}
-        <ul class="messagelist">{% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
-        {% endfor %}</ul>
+            </div>
+          {% endblock sidebar_menu %}
         {% endif %}
-    {% endblock messages %}
+      {% endif %}
 
-    <!-- Content -->
-    <div id="content" class="{% block coltype %}colM{% endblock %}">
-        {% block pretitle %}{% endblock %}
-        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
-        {% block content %}
-        {% block object-tools %}{% endblock %}
-        {{ content }}
-        {% endblock %}
-        {% block sidebar %}{% endblock %}
-        <br class="clear">
+      {% block content_container %}
+        <div id="content" class="{% if is_displaying_menu %}col-xs-8 col-xs-offset-4 col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2{% else %}col-sm-12{% endif %} main {% block coltype %}colM{% endblock %}">
+          {% block main_header %}
+            <div class="main-header">
+              {% if is_displaying_menu %}
+                <button type="button" class="show-hide-sidebar-menu">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+              {% endif %}
+              {% block pretitle %}{% endblock %}
+              {% block content_title %}
+                <h1>
+                <img height="32" src="{% static "/cart_management/Rebub_Favicon_Babordplus_black.svg" %}" alt="{{ site_header|default:_('Django administration') }}">
+                {% if title %}
+                  <span class="django-admin-title">{{ site_header|default:_('Django administration') }} &raquo;</span>
+                  {{ title }}
+                {% else %}
+                  {{ site_header|default:_('Django administration') }}
+                {% endif %}
+                </h1>
+              {% endblock %}
+              <div id="user-tools" class="btn-group">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    {% if user.is_active and user.is_staff %}
+                      {% block welcome-msg %}
+                        {% firstof user.get_short_name user.get_username %}
+                      {% endblock %}
+                    {% endif %}
+                    <span class="caret"></span>
+                  </button>
+
+                  {% url 'django-admindocs-docroot' as docsroot %}
+                  <ul class="dropdown-menu pull-right" role="menu">
+                    {% if docsroot %}
+                      <li class="hidden-sm">
+                        <a href="{{ docsroot }}">{% trans 'Documentation' %}</a>
+                      </li>
+                    {% endif %}
+                    {% if user.has_usable_password %}
+                      <li>
+                        <a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a>
+                      </li>
+                    {% endif %}
+                    <li>
+                      <a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>
+                    </li>
+                  </ul>
+                </div>
+                {% if docsroot %}
+                  <a href="{{ docsroot }}" title="{% trans 'Documentation' %}" class="btn btn-default hidden-sm"><span class="glyphicon glyphicon-book"></span></a>
+                {% endif %}
+                <a href="{% url 'admin:logout' %}" title="{% trans 'Log out' %}" class="btn btn-default hidden-xs">
+                  <span class="glyphicon glyphicon-off"></span>
+                </a>
+              </div>
+            </div>
+          {% endblock main_header %}
+          {% block breadcrumbs %}
+            <ol class="breadcrumb">
+              <li class="home">
+                <a href="{% url 'admin:index' %}" title="{% trans 'Home' %}"><span class="glyphicon glyphicon-home"></span></a>
+              </li>
+              <li class="active">{% if title %}{{ title }}{% endif %}</li>
+            </ol>
+          {% endblock %}
+
+          {% block messages %}
+            {% if messages %}
+                {% for message in messages %}
+                  <div role="alert" class="messagelist alert alert-{% if message.tags == 'info' %}success{% else %}{{ message.tags }}{% endif %} fade in">
+                    <button data-dismiss="alert" class="close" type="button"><span aria-hidden="true">×</span><span class="sr-only">{% trans "Close" %}</span></button>
+                    {{ message|capfirst }}
+                  </div>
+                {% endfor %}
+            {% endif %}
+          {% endblock messages %}
+
+          {% block content %}
+            {% block object-tools %}{% endblock %}
+            {{ content }}
+          {% endblock %}
+        </div>
+      {% endblock content_container %}
     </div>
-    <!-- END Content -->
+  </div>
 
-    {% block footer %}<div id="footer"></div>{% endblock %}
-</div>
-<!-- END Container -->
+{% block bootstrap_admin_js %}
+  <script>if (typeof jQuery === 'undefined' && django && django.jQuery) {jQuery = django.jQuery;}</script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="{% static 'bootstrap_admin/js/base.js' %}"></script>
+{% endblock bootstrap_admin_js %}
 
+{% block js %}{% endblock js %}
 </body>
 </html>

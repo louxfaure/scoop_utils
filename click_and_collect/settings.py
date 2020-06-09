@@ -35,6 +35,7 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 INSTALLED_APPS = [
     # 'grappelli',
+    'bootstrap_admin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
