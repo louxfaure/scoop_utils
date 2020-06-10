@@ -24,6 +24,7 @@ def index(request,user_id,institution_id):
     request.session['institution_id'] = institution_id
     request.session['user_id'] = user_id
     return redirect('homepage')
+
 def cart_homepage(request):
     user_id = request.session.get('user_id')
     institution_id = request.session.get('institution_id')

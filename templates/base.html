@@ -7,11 +7,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% bootstrap_css %}         {# Embed Bootstrap CSS #}
     {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
+    <link rel="stylesheet" type="text/css" href="{% static "/cart_management/style.css" %}" />
+    <script src="{% static "gestion_lecteurs/js/script.js" %}"></script>
     <script src="https://use.fontawesome.com/c560c025cf.js"></script>
    <title>{% block title %}Babord + - vos paniers{% endblock %}</title>
 
 </head>
 <body>
+<header>
+<nav class="navbar navbar-light bg-light flex-nowrap justify-content-between">
+  <span class="col-4 h2">
+    <img src="{% static "/cart_management/Rebub_Favicon_Babordplus_color.svg" %}" width="64" height="64" alt="">    
+    <span class="align-middle">Click & Collect</span>
+  </span>
+    <span class="col-4 text-center">
+        <h1 class="display-6">Validation de votre commande</h1>
+  </span>
+  <span class="col-4 text-right">
+    <a id="rech-bplus" class="btn btn-outline-info" href="https://babordplus.hosted.exlibrisgroup.com/primo-explore/search?vid=33PUDB_{{ request.session.institution_id }}_VU1&sortby=rank&lang=fr_FR"><i class="fa fa-search" aria-hidden="true"></i>Continuer votre sélection</a>
+  </span>
+</nav>
+    </header>
+
+    <main role="main">
+
     <!-- <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
             <h4 class="my-0 mr-md-auto font-weight-normal">
                 <a class="p-2 text-dark" href="/">
@@ -27,6 +46,9 @@
         {% include 'messages.html' %}
        {% block content %}{% endblock %}
    </div>
-<footer></footer>
+</main>
+<footer>
+	
+</footer>
 </body>
 </html>
