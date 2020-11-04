@@ -8,8 +8,7 @@ import json
 import logging
 import xml.etree.ElementTree as ET
 import time
-# internal import
-from mail import mail
+
 
 
 __version__ = '0.1.0'

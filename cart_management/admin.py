@@ -9,8 +9,19 @@ admin.site.index_title = "Gestion du Clic and Collect"
 
 
 admin.site.register(PickupLocation)
-admin.site.register(Person)
 
+class AppointmentInline(admin.TabularInline):
+    model = Appointment
+    fields = ['library','date']
+    show_change_link = True
+    # readonly_fields = ('status',)
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'barcode', 'email')
+    ordering = ('last_name','first_name')
+    search_fields = ('last_name','first_name', 'barcode')
+    inlines = [AppointmentInline]
 
 @admin.register(Items)
 class ItemsAdmin(admin.ModelAdmin):
@@ -26,9 +37,6 @@ class ItemsInline(admin.TabularInline):
     def status(self,obj):
         return obj.get_item_status()
 
-class PersonInline(admin.TabularInline):
-    model = Person
-    fields = ['first_name','last_name', 'barcode','email']
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):

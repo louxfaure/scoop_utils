@@ -12,6 +12,7 @@
 
   <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static 'admin/css/base.css' %}{% endblock %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'admin/css/datetime_widget.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static "/cart_management/style_admin.css" %}" />
 
 {% block extrastyle %}{% endblock %}
 
@@ -75,24 +76,11 @@
               {% block filters %}{% endblock filters %}
 
               {% if available_apps %}
-              {% for app in available_apps %}
-                <ul class="nav nav-sidebar app-{{ app.app_label }} module{% if app.app_url in current_url %} has-active-menu show-models{% endif %}">
-                  <li {% if app.app_url == current_url %} class="active"{% endif %}>
-                    <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
-                      {{ app.name }}
-                    </a>
-                  </li>
-                  {% for model in app.models %}
-                    <li {% if model.admin_url in current_url %}class="active"{% endif %}>
-                      <a href="{% firstof model.admin_url model.add_url '#' %}" title="{% if not model.admin_url and not model.add_url %}{% trans "You don't have permission to view or edit anything." %}{% endif %}">{{ model.name }}</a>
-                    </li>
-                  {% endfor %}
-                </ul>
-              {% endfor %}
                {% get_library_list as all_library_list %}
                <ul class="nav nav-sidebar">
                     <li>
                         <a href="#" class="section" title="Liste des plages de retrait par bibliothèque">
+                        <span class="glyphicon glyphicon-calendar"></span>
                         Rendez-vous
                         </a>
                     </li>
@@ -102,8 +90,24 @@
                       <a href="{% get_library_url library.id_alma %}" title="">{{ library.name }}</a>
                     </li>
                 {% endfor %}
-
                 </ul>
+              <ul class="nav nav-sidebar-other">
+                    <li>
+                        <a href="{% url 'admin:cart_management_person_changelist' %}" class="section" title="Rechercher un lecteur">
+                        <span class="glyphicon glyphicon-user"></span>
+                        Lecteurs
+                        </a>
+                    </li>
+                </ul>
+                            <ul class="nav nav-sidebar-other">
+                    <li>
+                        <a href="{% url 'admin:cart_management_items_changelist' %}" class="section" title="Rechercher un lecteur">
+                        <span class="glyphicon glyphicon-book"></span>
+                        Réservations
+                        </a>
+                    </li>
+                </ul>
+                
             {% else %}
               <p class="permission-warning">{% trans "You don't have permission to view or edit anything." %}</p>
             {% endif %}

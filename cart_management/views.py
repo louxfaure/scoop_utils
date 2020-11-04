@@ -85,8 +85,8 @@ def request_delation(request, request_id, institution, pickup_loc_id):
     return redirect('cart-validation', pickup_loc_id=pickup_loc_id)
 
 def rdv(request, pickup_loc_id, user_id, date_rdv):
-    # date_rdv_in_date = datetime.strptime(date_rdv, '%Y-%m-%d %H:%M:%S+00:00')
-    date_rdv_in_date = date_rdv
+    date_rdv_in_date = datetime.strptime(date_rdv, '%Y-%m-%d %H:%M:%S')
+    # date_rdv_in_date = date_rdv
     pickup_loc = PickupLocation.objects.get(id_alma=pickup_loc_id)
     error, user = services_request.get_user_info(user_id,pickup_loc.institution)
     if error :

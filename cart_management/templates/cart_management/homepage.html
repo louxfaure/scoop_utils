@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ identifiant }}{% endblock %}
 {% block content %}
-<div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-        <h1 class="display-4">Vos paniers</h1>
-</div>
 <div class="container">
+        <div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h2 class="display-5">Les documents que vous avez sélectionné appartiennent à différentes bibliothèques et sont à retirer à différents guichets.</b></h2>
+        </div>
                 <div class="jumbotron">
-                <h1 class="display-4">Vous avez plusieurs paniers</h1>
-                <p class="lead">Les documents que vous avez sélectionné appartiennent à différentes bibliothèques et sont à retirer à différents guichets.</p>
+                <p class="lead">Vous devez valider indépendamment chaque panier et sélectioner une plage de rendez-vous pour chaque bibliothèque.</p>
                 <hr class="my-4">
-                <p>Vous devez valider indépendamment chaque panier et sélectioner une plage de rendez-vous pour chaque bibliothèque</p>
                         {% for cart_id, cart in user_carts.items %}
                         <a class="btn btn-primary btn-lg" href="{% url 'cart-validation' cart_id %}" role="button">{{ cart.name }}
                                 <span class="badge badge-light">{{ cart.user_request_list|length }}</span>

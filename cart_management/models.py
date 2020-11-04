@@ -132,6 +132,8 @@ class Items(models.Model):
         null=True,
     )
 
+    def __str__(self):
+        return self.user_request_id
 
     class Meta:
         verbose_name = "Document réservé"
