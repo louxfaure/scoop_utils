@@ -30,7 +30,6 @@ def cart_homepage(request):
     institution_id = request.session.get('institution_id')
     logger.error("Je viens de la vue")
     error, user = services_request.get_user_info(user_id,institution_id)
-    user.save()
     if error :
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
         return render(request, "cart_management/error.html", locals())
@@ -41,7 +40,7 @@ def cart_homepage(request):
     if not user_carts :
         messages.error(request, "Vous n'avez pas de réservations actives")
         return render(request, "cart_management/error.html", locals())
-
+    user.save()
     request.session['cart_list'] = user_carts
     if len(user_carts) == 1 :
         pickup_loc = list(user_carts.keys())[0] 
@@ -135,5 +134,5 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
     )
     #5 - On regarde s'il reste des paniers à valider
     institution_id = request.session.get('institution_id')
-    other_cart_list = Items.objects.filter(person='afaure001003@u-bordeaux.fr').filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
+    other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
     return render(request, "cart_management/confirmation_page.html", locals())
