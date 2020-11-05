@@ -40,7 +40,7 @@ def get_user_info(user_id,institution):
                         email = user['contact_info']['email'][0]['email_address']
                         )
             # return False, u           
-            # u.save()
+            u.save()
             return False, u
         else :
             logger.error(user)
