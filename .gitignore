@@ -1,7 +1,7 @@
 db.sqlite3
 **/__pycache__/
 *.pyc
-click_and_collect/settings.py
-click_and_collect/wsgi.py
+settings.py
+wsgi.py
 *.sqlite3
 db.json

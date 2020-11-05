@@ -26,10 +26,21 @@
             <a class="list-group-item list-group-item-action" href="{% url 'admin:cart_management_person_changelist' %}" title=""><span class="glyphicon glyphicon-user"></span> Rechercher un lecteur</a>
             <a class="list-group-item list-group-item-action" href="{% url 'admin:cart_management_items_changelist' %}" title=""><span class="glyphicon glyphicon-book"></span> Rechercher une réservation</a>
       </div>
+  {# block superadmin#}
+  {% if user.is_superuser %}
+    <h2 class="display-4">Accès administrateur</h2>
+    {% for app in app_list %}
+      <h3 class="display-5">{{ app.name }}</h2>
+        <div class="list-group">
+        {% for model in app.models %}
+            <a class="list-group-item list-group-item-action" href="{% if model.admin_url %}{{ model.admin_url }}{% else %}#{% endif %}" title="{{ app.name }} &raquo; {{ model.name }}" {% if not model.admin_url %}class="disabled"{% endif %}>{{ model.name }}</a>
+        {% endfor %}
+        </div>
+    {% endfor %}
+  {% endif %}
 </div>
-
   {% else %}
-    <p>{% trans "You don't have permission to view or edit anything." %}</p>
+    <p>{% trans "Vous ne pouvez rien éditer." %}</p>
   {% endif %}
 </div>
 {% endblock %}
