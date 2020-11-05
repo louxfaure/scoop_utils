@@ -42,7 +42,7 @@ class PickupLocation(models.Model):
     handling_time = models.IntegerField(verbose_name=u"Délai en jour pour la préparation de la commande",default=2)
     handling_time_external_library = models.IntegerField(verbose_name=u"Délai en jours pour la préparation de la commande quand le document vient d'une autre bibliothèque",default=7)
     open_hour = models.IntegerField(verbose_name=u"Heure d'ouverture du service de retrait",default=9)
-    close_hour = models.IntegerField(verbose_name=u"Heure d'ouverture du service de retrait",default=17)
+    close_hour = models.IntegerField(verbose_name=u"Heure de fermeture du service de retrait",default=17)
     days_for_booking = models.IntegerField(verbose_name=u"Nombre de jours à proposer pour la prise de rdv",default=10)
     email = models.EmailField(verbose_name=u"Adresse vers laquelle envoyer la liste des documents résercés",default="alexandre.faure@u-bordeaux.fr")
     url = models.URLField(verbose_name=u"Lien vers les informations d'accès à la bibliothèque",blank=True,default='')
@@ -57,18 +57,6 @@ class PickupLocation(models.Model):
         verbose_name = "Bibliothèque de retrait"
         verbose_name_plural = "Bibliothèques de retrait"
 
-class Cart(models.Model):
-    booked = models.BooleanField(default=False)
-    item_from_other_library = models.BooleanField(default=False)
-    person = models.ForeignKey(
-        Person,
-        on_delete=models.CASCADE,
-    )
-    pickuplocation = models.ForeignKey(
-        PickupLocation,
-        on_delete=models.CASCADE,
-    )
-
 class Appointment(models.Model):
     date =  models.DateTimeField(verbose_name=u"Date de retrait des ouvrages")
     person = models.ForeignKey(
@@ -82,6 +70,8 @@ class Appointment(models.Model):
         on_delete=models.CASCADE,
         verbose_name=u"Bibliothèque de retrait"
     )
+    done = models.BooleanField(default=False,verbose_name=u"Commande retirée ?")
+
     class Meta:
         unique_together = (('date', 'library'),)
         verbose_name = "Rendez-vous"
@@ -107,7 +97,7 @@ class Appointment(models.Model):
         return date_to_return.strftime(formats_list[format])
 
 class Items(models.Model):
-    user_request_id =  models.CharField(max_length=16,primary_key=True,verbose_name=u" id")
+    user_request_id =  models.CharField(max_length=16,primary_key=True,verbose_name=u"Identifiant de la réservation")
     title = models.CharField(max_length=500,verbose_name=u"Titre de l'exemplaire")
     item_barcode = models.CharField(max_length=30,verbose_name=u"Code-barres",blank=True, null=True)
     library_name = models.CharField(max_length=200,verbose_name=u"Nom de la bibliotheque")
@@ -116,13 +106,14 @@ class Items(models.Model):
     call_number = models.CharField(max_length=30,verbose_name=u"Cote de l'exemplaire",blank=True, null=True)
     description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (système)",blank=True, null=True)
     manual_description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (usager)",blank=True, null=True)
-    booked = models.BooleanField(default=False)
     person = models.ForeignKey(
         Person,
+        verbose_name=u"Demandeur",
         on_delete=models.CASCADE,
     )
     pickuplocation = models.ForeignKey(
         PickupLocation,
+        verbose_name=u"Bibliothèque de retrait",
         on_delete=models.CASCADE,
     )
     appointment = models.ForeignKey(

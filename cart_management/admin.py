@@ -3,9 +3,9 @@ from django.utils.html import format_html
 from .models import PickupLocation,Person,Items, Appointment
 
 
-admin.site.site_title = "Gestion du Clic and Collect "
-admin.site.site_header = "Gestion du Clic and Collect"
-admin.site.index_title = "Gestion du Clic and Collect"
+admin.site.site_title = "Gestion du Click and Collect "
+admin.site.site_header = "Gestion du Click and Collect"
+admin.site.index_title = "Gestion du Click and Collect"
 
 
 admin.site.register(PickupLocation)
@@ -41,9 +41,9 @@ class ItemsInline(admin.TabularInline):
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('date', 'library','person')
-    list_filter = ['date','library']
-    fields = ['date','library','user_formated']
+    list_display = ('date', 'library','person','done')
+    list_filter = ['date','library','done']
+    fields = ['date','library','user_formated','done']
     readonly_fields = ['user_formated', 'library']
     inlines = [ItemsInline]
 
