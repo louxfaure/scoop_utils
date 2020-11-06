@@ -20,11 +20,11 @@
           
             {% for library in all_library_list %}
               {% get_library_url library.id_alma as library_url %}
-              <a class="list-group-item list-group-item-action" href="{% get_library_url library.id_alma %}" title=""><span class="glyphicon glyphicon-education"></span>{{ library.name }}</a>
+              <a class="list-group-item list-group-item-action" href="{{ library_url }}" title=""><span class="glyphicon glyphicon-education"></span>{{ library.name }}</a>
             {% endfor %}
       {% else %}
         {% get_library_url user.staff.library.id_alma as library_url %}
-        <a class="list-group-item list-group-item-action" href="{% get_library_url user.staff.library.id_alma %}" title=""><span class="glyphicon glyphicon-education"></span>{{ user.staff.library.name }}</a>    
+        <a class="list-group-item list-group-item-action" href="{{ library_url }}" title=""><span class="glyphicon glyphicon-education"></span>{{ user.staff.library.name }}</a>    
       {% endif %}
       </div>
     <h2 class="display-4">Autres accès</h2>

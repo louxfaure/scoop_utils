@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from .models import PickupLocation,Person,Items, Appointment,Staff
 
 
@@ -40,12 +41,35 @@ class ItemsInline(admin.TabularInline):
         return obj.get_item_status()
 
 
+
+class BookingStatusFilter(admin.SimpleListFilter):
+  title = 'Commande retirée' # a label for our filter
+  parameter_name = 'booking_done' # you can put anything here
+
+  def lookups(self, request, model_admin):
+    # This is where you create filter options; we have two:
+    return [
+        ('done', 'Commande retirée'),
+        ('not_done', 'Commande non retirée'),
+    ] 
+
+  def queryset(self, request, queryset):
+    # This is where you process parameters selected by use via filter options:
+    if self.value() == 'done':
+        # Get websites that have at least one page.
+        return queryset.distinct().filter(is_done=True)
+    if self.value() == 'not_done':
+        # Get websites that don't have any pages.
+        return queryset.distinct().filter(is_done=False)
+
+
+
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('date', 'library','person','done')
-    list_filter = ['date','library','done']
-    fields = ['date','library','user_formated','done']
+    list_display = ('date', 'library','person','is_done')
+    list_filter = ['date','library', BookingStatusFilter]
+    fields = ('date','library','user_formated','is_done')
     readonly_fields = ['user_formated', 'library']
     inlines = [ItemsInline]
 

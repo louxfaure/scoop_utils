@@ -72,7 +72,7 @@ class Appointment(models.Model):
         on_delete=models.CASCADE,
         verbose_name=u"Bibliothèque de retrait"
     )
-    done = models.BooleanField(default=False,verbose_name=u"Commande retirée ?")
+    is_done = models.BooleanField(default=False,verbose_name=u"Commande retirée ?")
 
     class Meta:
         unique_together = (('date', 'library'),)

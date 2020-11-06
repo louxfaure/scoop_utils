@@ -33,3 +33,12 @@ def get_library_url(library_id):
     now= datetime.today()
     library_url = "{}?library__id_alma__exact={}&date__gte={}".format(url,library_id,now.strftime("%Y-%m-%d"))
     return library_url
+
+@register.simple_tag
+
+def get_url_booking_not_done(library_id):
+    url = reverse('admin:cart_management_appointment_changelist', 
+              current_app='cart_management_appointment')
+    now= datetime.today()
+    library_url = "{}?library__id_alma__exact={}&date__lt={}".format(url,library_id,now.strftime("%Y-%m-%d"))
+    return library_url
