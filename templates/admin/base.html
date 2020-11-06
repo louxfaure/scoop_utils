@@ -84,12 +84,21 @@
                         Rendez-vous
                         </a>
                     </li>
-                {% for library in all_library_list %}
-                    {% get_library_url library.id_alma as library_url %}
+                {% if not user.staff.library %}
+                  {% for library in all_library_list %}
+                      {% get_library_url library.id_alma as library_url %}
+                      <li>
+                        <a href="{% get_library_url library.id_alma %}" title="">{{ library.name }}</a>
+                      </li>
+                  {% endfor %}
+                {% else %}
                     <li>
-                      <a href="{% get_library_url library.id_alma %}" title="">{{ library.name }}</a>
+                        {% get_library_url user.staff.library.id_alma as library_url %}
+                        <a href="{% get_library_url user.staff.library.id_alma %}" title="">
+                        {{ user.staff.library.name }}
+                        </a>
                     </li>
-                {% endfor %}
+                {% endif %}
                 </ul>
               <ul class="nav nav-sidebar-other">
                     <li>

@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import datetime
+from django.contrib.auth.models import User
 # from django.utils.safestring import SafeString
+
 
 # Create your models here.
 class Person(models.Model):
@@ -133,4 +135,14 @@ class Items(models.Model):
     def get_item_status(self):
         from .services import services_request
 
-        return services_request.get_request_user_status(self.person.id_alma,self.user_request_id,self.pickuplocation.institution)
+        return services_request.get_request_user_status(self.person.id_alma,self.user_request_id,self.pickuplocation.institution)  
+
+# Comptes admin ajout d'un champ
+class Staff(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    library = models.ForeignKey(
+        PickupLocation,
+        on_delete=models.CASCADE,
+        verbose_name=u"Bibliothèque"
+    )
+

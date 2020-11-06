@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import PickupLocation,Person,Items, Appointment
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from .models import PickupLocation,Person,Items, Appointment,Staff
 
 
 admin.site.site_title = "Gestion du Click and Collect "
@@ -50,3 +52,17 @@ class AppointmentAdmin(admin.ModelAdmin):
     def user_formated(self, obj):
         return format_html('{} -- {} - <a href="mailto:{}">{}</a>', obj.person.full_name, obj.person.barcode,obj.person.email,obj.person.email)
     user_formated.short_description = format_html('<b><span class="glyphicon glyphicon-user"></span> Lecteur</b>')
+
+
+
+class StaffInline(admin.StackedInline):
+    model = Staff
+    can_delete = False
+    verbose_name_plural = 'Bibliothèque'
+# Define a new User admin
+class UserAdmin(BaseUserAdmin):
+    inlines = [StaffInline]
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)

@@ -14,13 +14,19 @@
   {% if app_list %}
   <div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto">
     <h2 class="display-4">Liste des rendez-vous par bibliothèque de retrait des documents</h2>
-    {% get_library_list as all_library_list %}
-        <div class="list-group">
-          {% for library in all_library_list %}
-            {% get_library_url library.id_alma as library_url %}
-            <a class="list-group-item list-group-item-action" href="{% get_library_url library.id_alma %}" title="">{{ library.name }}</a>
-          {% endfor %}
-          </div>
+      <div class="list-group">
+      {% if not user.staff.library %}
+      {% get_library_list as all_library_list %}
+          
+            {% for library in all_library_list %}
+              {% get_library_url library.id_alma as library_url %}
+              <a class="list-group-item list-group-item-action" href="{% get_library_url library.id_alma %}" title=""><span class="glyphicon glyphicon-education"></span>{{ library.name }}</a>
+            {% endfor %}
+      {% else %}
+        {% get_library_url user.staff.library.id_alma as library_url %}
+        <a class="list-group-item list-group-item-action" href="{% get_library_url user.staff.library.id_alma %}" title=""><span class="glyphicon glyphicon-education"></span>{{ user.staff.library.name }}</a>    
+      {% endif %}
+      </div>
     <h2 class="display-4">Autres accès</h2>
        <div class="list-group">
             <a class="list-group-item list-group-item-action" href="{% url 'admin:cart_management_person_changelist' %}" title=""><span class="glyphicon glyphicon-user"></span> Rechercher un lecteur</a>
