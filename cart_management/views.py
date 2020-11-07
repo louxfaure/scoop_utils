@@ -31,15 +31,14 @@ def cart_homepage(request):
     logger.error("Je viens de la vue")
     error, user = services_request.get_user_info(user_id,institution_id)
     if error :
-        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
+        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return render(request, "cart_management/error.html", locals())
     error, user_carts = services_request.get_user_carts(user,institution_id)
     if error :
-        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
+        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return render(request, "cart_management/error.html", locals())
     if not user_carts :
-        messages.error(request, "Vous n'avez pas de réservations actives")
-        return render(request, "cart_management/error.html", locals())
+        return render(request, "cart_management/panier_vide.html", locals())
     user.save()
     request.session['cart_list'] = user_carts
     if len(user_carts) == 1 :
@@ -125,9 +124,10 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
         html_message=html_message,
     )
     #3 - On envoi un mail à l'usager
+    plain_message = loader.render_to_string("cart_management/user_mail_message.txt", locals())
     send_mail(
-        "{} : Votre commande est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
-        "Vos documents pourront être retirés à la {} le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+        "{} : Votre demande de Clic et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+        plain_message,
         pickup_loc.email,
         [user.email],
         fail_silently=False,

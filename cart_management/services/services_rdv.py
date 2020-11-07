@@ -1,5 +1,5 @@
 from datetime import datetime, time,timedelta
-from ..models import Appointment,Person 
+from ..models import Appointment,Person, PickupLocation 
 import pytz
 
 class Resas(object):
@@ -17,12 +17,15 @@ class Resas(object):
         self.hour_to = hour_to
         self.plots_number = plots_number
         self.handling_time = handling_time
+        pl = PickupLocation.objects.get(name=pickup_loc)
+        self.mid_day_break = pl.mid_day_break
+        self.opening_days = pl.opening_days.all().values_list('day_no', flat=True)
         date_from = self.get_date_from()
         date_to = date_from + timedelta(days=days_for_booking)
         self.rdvs = self.get_appointments(date_from,date_to)       
-        while date_from <= date_to:
+        while date_from <= date_to:  
             # Un jour est ouvré s'il n'est ni férié, ni samedi, ni dimanche
-            if not self.is_holiday(date_from) and date_from.isoweekday() not in [6, 7]:
+            if not self.is_holiday(date_from) and date_from.isoweekday() not in [6, 7] and date_from.isoweekday() in self.opening_days: 
                 # my_object = {date_from : my_hours}
                 self.list_days.append(date_from)
             date_from += timedelta(days=1)
@@ -32,13 +35,15 @@ class Resas(object):
         now = datetime.today()
         # start_date = now.replace(hour=0, minute=0, second=0, microsecond=0,tzinfo=pytz.timezone('Europe/Paris'))
         start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        if start_date.isoweekday in [1,2,3,7]:
-            return start_date + timedelta(days=self.handling_time)
-        elif start_date.isoweekday in [4,5]:
-            return start_date + timedelta(days=self.handling_time + 2)
-        else :
-             return start_date + timedelta(days=self.handling_time + 1)
-        return start_date
+        return start_date + timedelta(days=self.handling_time)
+        # print(start_date.isoweekday)
+        # if start_date.isoweekday in [1,2,3,7]:
+        #     return start_date + timedelta(days=self.handling_time)
+        # elif start_date.isoweekday in [4,5]:
+        #     return start_date + timedelta(days=self.handling_time + 2)
+        # else :
+        #      return start_date + timedelta(days=self.handling_time + 1)
+        # return start_date
     
     def easter_date(self,year):
         """
@@ -98,8 +103,11 @@ class Resas(object):
         start_hour = self.hour_from
         end_hour = self.hour_to
         while start_hour <= end_hour:
-            # print(start_hour)
             x = 0
+            if self.mid_day_break == True and start_hour in [12,13]:
+                start_hour += 1
+                continue
+            print(start_hour)
             for plot in range(self.plots_number):
                 plot = []
                 for day in self.list_days:

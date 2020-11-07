@@ -125,19 +125,23 @@ def get_user_carts(user,institution):
         if status == "Success":
             # print("{} --> {} : {}".format(institution,status,requests['total_record_count']))
             if  user_requests['total_record_count'] > 0:
-                for user_request in user_requests["user_request"]:
+                for user_request in user_requests["user_request"]:                   
                     if user_request["request_status"] == 'IN_PROCESS' and "last_interest_date" not in user_request:
                         pickup_location_library = user_request['pickup_location_library']
-                        if pickup_location_library not in  user_carts_list:
-                            print('truc')  
-                            user_carts_list[pickup_location_library] = {}
-                            user_carts_list[pickup_location_library]["user_request_list"] = []
-                            user_carts_list[pickup_location_library]["item_from_other_library"] = False
-                            user_carts_list[pickup_location_library]["name"] = user_request['pickup_location']
-                        user_request_item = get_user_request_item(user_request,api_key,user)
-                        if user_request_item.library_id != pickup_location_library :
-                            user_carts_list[pickup_location_library]["item_from_other_library"] = True                 
-                        user_carts_list[pickup_location_library]["user_request_list"].append(user_request_item.user_request_id)
+                        try:
+                            pickuplocation = PickupLocation.objects.get(id_alma=user_request['pickup_location_library'])
+                            if pickup_location_library not in  user_carts_list:
+                                print('truc')  
+                                user_carts_list[pickup_location_library] = {}
+                                user_carts_list[pickup_location_library]["user_request_list"] = []
+                                user_carts_list[pickup_location_library]["item_from_other_library"] = False
+                                user_carts_list[pickup_location_library]["name"] = user_request['pickup_location']
+                            user_request_item = get_user_request_item(user_request,api_key,user)
+                            if user_request_item.library_id != pickup_location_library :
+                                user_carts_list[pickup_location_library]["item_from_other_library"] = True                 
+                            user_carts_list[pickup_location_library]["user_request_list"].append(user_request_item.user_request_id)
+                        except PickupLocation.DoesNotExist:
+                            pickuplocation = 'none'
         elif status == "Error":
             logger.error(user_request)
             return True,user_requests

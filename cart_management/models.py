@@ -24,6 +24,13 @@ class Person(models.Model):
         "Returns the person's full name."
         return '%s %s' % (self.first_name, self.last_name)
 
+class DaysOfWeek(models.Model):
+    day_no = models.IntegerField()
+    day = models.CharField(max_length=8)
+
+    def __str__(self):
+        return self.day
+
 class PickupLocation(models.Model):
     UB = 'UB'
     UBM = 'UBM'
@@ -40,13 +47,16 @@ class PickupLocation(models.Model):
     id_alma =  models.CharField(max_length=10,primary_key=True,verbose_name=u"Identifiant Alma")
     name = models.CharField(max_length=200,verbose_name=u"Nom de la bibliotheque")
     institution = models.CharField(max_length=5,verbose_name=u"Code l'institution ",choices=INSTITUTION_CHOICES,default=UB)
-    plot_number = models.IntegerField(verbose_name=u"Nombre de plages par heure",default=1)
-    handling_time = models.IntegerField(verbose_name=u"Délai en jour pour la préparation de la commande",default=2)
+    plot_number = models.IntegerField(verbose_name=u"Nombre de plages par heure",default=4)
+    handling_time = models.IntegerField(verbose_name=u"Délai en jour pour la préparation de la commande",default=1)
     handling_time_external_library = models.IntegerField(verbose_name=u"Délai en jours pour la préparation de la commande quand le document vient d'une autre bibliothèque",default=7)
     open_hour = models.IntegerField(verbose_name=u"Heure d'ouverture du service de retrait",default=9)
     close_hour = models.IntegerField(verbose_name=u"Heure de fermeture du service de retrait",default=17)
+    opening_days = models.ManyToManyField(DaysOfWeek)
+    mid_day_break = models.BooleanField(default=False,verbose_name=u"Fermeture méridienne (bibliothèque fermée entre 12h & 14h)")
     days_for_booking = models.IntegerField(verbose_name=u"Nombre de jours à proposer pour la prise de rdv",default=10)
     email = models.EmailField(verbose_name=u"Adresse vers laquelle envoyer la liste des documents résercés",default="alexandre.faure@u-bordeaux.fr")
+    tel = models.CharField(max_length=50,verbose_name=u"Téléphone",blank=True,default='00 00 00 00 00')
     url = models.URLField(verbose_name=u"Lien vers les informations d'accès à la bibliothèque",blank=True,default='')
     message = models.CharField(max_length=500,verbose_name=u"Message",blank=True,default='')
     lat = models.CharField(max_length=50,verbose_name=u"Latitude",blank=True,default='')

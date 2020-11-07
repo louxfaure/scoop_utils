@@ -3,15 +3,15 @@ from django.utils.html import format_html
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from .models import PickupLocation,Person,Items, Appointment,Staff
+from .models import PickupLocation,Person,Items, Appointment,Staff, DaysOfWeek
 
 
 admin.site.site_title = "Gestion du Click and Collect "
 admin.site.site_header = "Gestion du Click and Collect"
 admin.site.index_title = "Gestion du Click and Collect"
 
-
-admin.site.register(PickupLocation)
+admin.site.register(DaysOfWeek)
+# admin.site.register(PickupLocation)
 
 class AppointmentInline(admin.TabularInline):
     model = Appointment
@@ -90,3 +90,12 @@ class UserAdmin(BaseUserAdmin):
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+
+# class WeekDaysInline(admin.TabularInline):
+#     model = DaysOfWeek
+
+
+@admin.register(PickupLocation)
+class PickupLocation(admin.ModelAdmin):
+    filter_horizontal = ('opening_days',)
+    # inlines = [WeekDaysInline]

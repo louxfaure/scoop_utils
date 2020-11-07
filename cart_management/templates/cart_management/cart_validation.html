@@ -2,7 +2,7 @@
 {% block title %}{{ identifiant }}{% endblock %}
 {% block content %}
 <div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h2 class="display-4">Vous avez réservé  {{ user_requests_list|length }} documents à retirer à la <b>{{ pickup_loc.name }}:</b></h2>
+    <h2 class="display-4">Vous avez réservé {{ user_requests_list|length }} document(s) à retirer à la <b>{{ pickup_loc.name }}:</b></h2>
 </div>
 <div class="container">
     <div class="content-accordion">
@@ -30,7 +30,7 @@
                     <a class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                     <h2 class="mb-0">
                     <i class="fa fa-calendar" aria-hidden="true"></i>
-                    Chosissez la date de retrait de vos ouvrages 
+                    Chosissez la date de retrait de vos documents 
                     <i class="pull-right fa fa-plus"></i>
                     </h2>
                     </a>
