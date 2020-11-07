@@ -1,6 +1,6 @@
 Bonjour, 
 Les documents que vous avez réservés pourront être retirés à la bibliothèque {{ pickup_loc.name }} le {{ date_rdv_in_date|date:"l d F Y" }} à {{ date_rdv_in_date|date:"H:i" }} h, sur présentation de votre carte Aquipass ou carte de bibliothèque.
-{% if pickup_loc.mesage %}
+{% if pickup_loc.message %}
 {{ pickup_loc.message }}
 {% endif %}
 En cas d’empêchement, merci de contacter la bibliothèque par téléphone au {{ pickup_loc.tel }} du lundi au vendredi, de 9h à 17h, afin de convenir d’un autre créneau.
