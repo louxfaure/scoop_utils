@@ -4,6 +4,7 @@ import json
 
 from .Alma_services import Alma_Apis_Users, Alma_Apis_Records
 from ..models import Person,PickupLocation, Items
+from django.conf import settings
 
 # INSTITUTIONS_LIST = ['NETWORK','UB','UBM','IEP','INP','BXSA']
 INSTITUTIONS_LIST = ['UB','BXSA']
@@ -29,7 +30,7 @@ def get_user_info(user_id,institution):
         person = Person.objects.get(id_alma=user_id)
         return False, person
     except Person.DoesNotExist:
-        api_key = os.getenv("TEST_{}_API".format(institution)) 
+        api_key = settings.ALMA_API_KEY[institution] 
         api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='get_user_info')
         status, user = api.get_user(user_id,accept='json')
         if status == "Success":
@@ -118,7 +119,7 @@ def get_user_carts(user,institution):
     user_carts_list = {}
     for institution in INSTITUTIONS_LIST :
         # api_key = os.getenv("PROD_{}_USER_API".format(institution))
-        api_key = os.getenv("TEST_{}_API".format(institution))
+        api_key = settings.ALMA_API_KEY[institution]
         api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
         status, user_requests = api.get_user_requests(user.id_alma,'HOLD',limit = 50,accept='json')
         logger.info("{} --> {} : {}".format(institution,status,user_requests))
@@ -148,7 +149,7 @@ def get_user_carts(user,institution):
     return False,user_carts_list       
 
 def delete_user_request(user_id,user_request_id,institution):
-    api_key = os.getenv("TEST_{}_API".format(institution))
+    api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     statut, reponse = api.delete_user_request(user_id,user_request_id,accept='json')
     return statut
@@ -195,7 +196,7 @@ def update_user_request(appointment,user_requests_list,institution):
         [str] -- statut du traitement
     """
     print(institution)
-    api_key = os.getenv("TEST_{}_API".format(institution))
+    api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     for cart_user_request in user_requests_list:
         id_lecteur = cart_user_request.person
@@ -223,7 +224,7 @@ def get_request_user_status(user_id,user_request_id,institution):
         "On Hold Shelf" : "Sur les étagères de réservation",
         "Not Started" : "A récupérer en rayon"
     }
-    api_key = os.getenv("TEST_{}_API".format(institution))
+    api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     api_request_return_status, alma_user_request = api.get_user_request(user_id,user_request_id,accept='json')
     if api_request_return_status == "Error":
