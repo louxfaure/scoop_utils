@@ -7,7 +7,7 @@ from ..models import Person,PickupLocation, Items
 from django.conf import settings
 
 # INSTITUTIONS_LIST = ['NETWORK','UB','UBM','IEP','INP','BXSA']
-INSTITUTIONS_LIST = ['UB','BXSA']
+INSTITUTIONS_LIST = ['UB']
 #Initialisation des logs
 logger = logging.getLogger(__name__)
 
