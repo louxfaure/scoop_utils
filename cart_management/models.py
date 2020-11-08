@@ -113,6 +113,15 @@ class Appointment(models.Model):
         date_to_return = self.get_date_in_date_time()
         return date_to_return.strftime(formats_list[format])
 
+    def get_number_of_items(self):
+        return Items.objects.filter(appointment=self).count()
+    get_number_of_items.short_description = u'Nombre de documents'
+
+
+    # def get_number_of_canceled_items(self):
+    #     return Items.objects.filter(appointment=self).filter(get_item_status='IN_PROCESS').count()
+    # get_number_of_canceled_items.short_description = u'Nombre de documennts annulés'
+
 class Items(models.Model):
     user_request_id =  models.CharField(max_length=16,primary_key=True,verbose_name=u"Identifiant de la réservation")
     title = models.CharField(max_length=500,verbose_name=u"Titre de l'exemplaire")

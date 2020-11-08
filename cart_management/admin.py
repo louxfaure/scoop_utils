@@ -67,7 +67,7 @@ class BookingStatusFilter(admin.SimpleListFilter):
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('date', 'library','person','is_done')
+    list_display = ('date', 'library','person','get_number_of_items','is_done')
     list_filter = ['date','library', BookingStatusFilter]
     fields = ('date','library','user_formated','is_done')
     readonly_fields = ['user_formated', 'library']
