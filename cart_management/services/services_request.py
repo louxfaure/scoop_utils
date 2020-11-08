@@ -164,7 +164,7 @@ def refresh_user_request(user,pickup_location):
     # On récupère la liste des réservations en bases
     cart_user_requests_list = list(Items.objects.filter(pickuplocation=pickup_location.id_alma).filter(person=user.id_alma).filter(appointment__isnull=True).values_list('user_request_id', flat=True))
     # On récupère la liste des réservations dans Alma pour l'institution
-    api_key = settings.ALMA_API_KEY[institution]
+    api_key = settings.ALMA_API_KEY[pickup_location.institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     status, alma_user_requests_list = api.get_user_requests(user.id_alma,'HOLD',limit = 50,accept='json')
     if status == "Success":
