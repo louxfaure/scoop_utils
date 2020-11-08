@@ -97,5 +97,6 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(PickupLocation)
 class PickupLocation(admin.ModelAdmin):
+    list_display = ('id_alma', 'name','plot_number','handling_time','get_opening_days','open_hour','close_hour','mid_day_break','days_for_booking','email','message')
     filter_horizontal = ('opening_days',)
     # inlines = [WeekDaysInline]

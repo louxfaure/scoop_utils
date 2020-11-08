@@ -55,7 +55,7 @@ class PickupLocation(models.Model):
     opening_days = models.ManyToManyField(DaysOfWeek)
     mid_day_break = models.BooleanField(default=False,verbose_name=u"Fermeture méridienne (bibliothèque fermée entre 12h & 14h)")
     days_for_booking = models.IntegerField(verbose_name=u"Nombre de jours à proposer pour la prise de rdv",default=10)
-    email = models.EmailField(verbose_name=u"Adresse vers laquelle envoyer la liste des documents résercés",default="alexandre.faure@u-bordeaux.fr")
+    email = models.EmailField(verbose_name=u"Adresse vers laquelle envoyer la liste des documents résercés",default="")
     tel = models.CharField(max_length=50,verbose_name=u"Téléphone",blank=True,default='00 00 00 00 00')
     url = models.URLField(verbose_name=u"Lien vers les informations d'accès à la bibliothèque",blank=True,default='')
     message = models.CharField(max_length=500,verbose_name=u"Message",blank=True,default='')
@@ -68,6 +68,11 @@ class PickupLocation(models.Model):
     class Meta:
         verbose_name = "Bibliothèque de retrait"
         verbose_name_plural = "Bibliothèques de retrait"
+
+    def get_opening_days(self):
+        return ",".join([str(p) for p in self.opening_days.all()])
+    get_opening_days.short_description = u'Jours d\'ouverture'
+
 
 class Appointment(models.Model):
     date =  models.DateTimeField(verbose_name=u"Date de retrait des ouvrages")
