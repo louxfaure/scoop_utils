@@ -75,7 +75,7 @@ def request_delation(request, request_id, institution, pickup_loc_id):
         #Il est possible qu'à l'issue de la suppression de la réservation la panier soit vide. On renvoi alors vers la page d'accueil qui rafraichira toutes données de réservation
         user_requests_nb = Items.objects.filter(pickuplocation=pickup_loc_id).filter(person=user_id).filter(appointment__isnull=True).order_by('library_name', 'location').count()
         if user_requests_nb == 0:
-            messages.success(request, "Le document a été retiré de votre panier. Vous n'avez plus de résearvation en cour pour la bibliothèque {}".format(pickup_loc.name))
+            messages.success(request, "Le document a été retiré de votre panier. Vous n'avez plus de résearvation en cours pour la bibliothèque {}".format(pickup_loc.name))
             return redirect('homepage')
         messages.success(request, "Le document a été retiré de votre panier.")
     else:
