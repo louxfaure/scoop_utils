@@ -233,12 +233,14 @@ def get_request_user_status(user_id,user_request_id,institution):
         api_loan_return_status, api_loan_reponse = api.get_user_loans(user_id,limit = 50,accept='json')
         if api_loan_return_status == "Error":
             return "Statut inconnu"
-        print(json.dumps(api_loan_reponse, indent=2))
-        user_loans_list = api_loan_reponse['item_loan']
-        for user_loan in user_loans_list:
-            if alma_user_request["mms_id"] == user_loan["mms_id"]:
-                return "En prêt sur le compte du lecteur"
-        return "Demande annulée"
+        if api_loan_reponse['total_record_count'] > 0:
+            user_loans_list = api_loan_reponse['item_loan']
+            for user_loan in user_loans_list:
+                if alma_user_request["mms_id"] == user_loan["mms_id"]:
+                    return "En prêt sur le compte du lecteur"
+            return "Demande annulée"
+        else :
+            return "Demande annulée"
     return alma_user_request["request_status"]      
 
 
