@@ -118,7 +118,7 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
     send_mail(
         "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
         "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
-        pickup_loc.email,
+        pickup_loc.from_email,
         [pickup_loc.email],
         fail_silently=False,
         html_message=html_message,
@@ -128,7 +128,7 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
     send_mail(
         "{} : Votre demande de Clic et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
         plain_message,
-        pickup_loc.email,
+        pickup_loc.from_email,
         [user.email],
         fail_silently=False,
     )
