@@ -1,0 +1,10 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Ajout d'un rendez-vous</h1>
+<form action="/admin/cart_management/appointment/confirm/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+{{ something }}
+{% endblock %}

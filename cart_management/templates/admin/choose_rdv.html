@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-4">Le lecteur a {{ user_requests_list|length }} document(s) réservé(s) pour la <b>{{ pickup_loc.name }}:</b></h2>
+</div>
+<div class="container">
+    <div class="content-accordion">
+        <div class="accordion" id="accordionExample">
+            <div class="card shopping-cart">
+                <div class="card-header" id="headingOne">
+                    <a class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <h2 class="mb-0">
+                        <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                        Vérifiez le panier :
+                        <i class="pull-right fa fa-plus"></i>
+                        </h2>
+                    </a>
+                    
+                </div>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                    <div class="card-body">
+                    {% include './panier_admin.html' %}
+                    </div>
+                </div>
+            </div>
+            <div class="card apointment-list">
+                <div class="card-header" id="headingTwo">
+                
+                    <a class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <h2 class="mb-0">
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                    Chosissez le créneau de retrait de vos documents 
+                    <i class="pull-right fa fa-plus"></i>
+                    </h2>
+                    </a>
+                
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                <div class="card-body">
+                    {% include './resa_admin.html' %}
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<h1>Choix d'une plage horaire</h1>
+<h2>{{ lecteur.last_name }} -- {{ library.name }}</h2>
+{{ lecteur.last_name }}
+{% endblock %}

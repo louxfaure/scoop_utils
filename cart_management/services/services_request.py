@@ -63,8 +63,20 @@ def get_holding_info(holdings_list,library):
                 holding_info['call_number'] = holding['call_number']
                 holding_info['location'] = holding['location']['desc']
                 holding_info['library_id'] = holding['library']['value']
-                break
-    return holding_info
+                return holding_info
+    if library in ['Bib. pluridisciplinaire','Spot Pessac','BU Sciences et techniques'] :
+        for holding in holdings_list:
+        if holding['library']['desc'] == "BU droit, science politique, économie" :
+                holding_info['call_number'] = holding['call_number']
+                holding_info['location'] = holding['location']['desc']
+                holding_info['library_id'] = holding['library']['value']
+                return holding_info
+    holding_info['call_number'] = "None"
+    holding_info['location'] = "None"
+    holding_info['library_id'] = "None"
+
+        
+    
 
 def get_user_request_item(user_request,api_key,user):
     """Get title info for user request create an item object and return it
@@ -132,7 +144,6 @@ def get_user_carts(user,institution):
                         try:
                             pickuplocation = PickupLocation.objects.get(id_alma=user_request['pickup_location_library'])
                             if pickup_location_library not in  user_carts_list:
-                                print('truc')  
                                 user_carts_list[pickup_location_library] = {}
                                 user_carts_list[pickup_location_library]["user_request_list"] = []
                                 user_carts_list[pickup_location_library]["item_from_other_library"] = False
@@ -147,6 +158,42 @@ def get_user_carts(user,institution):
             logger.error(user_request)
             return True,user_requests
     return False,user_carts_list       
+
+def get_user_carts_admin(user,institution,library):
+    """Return a list of carts. Cart are requests user placed on the same pickup library. 
+
+    Arguments:
+        user_id {obj} -- user object
+        institution {str} -- Institution code from Primo
+    """
+    
+    #Search for user requests
+    user_carts_list = {}
+    # api_key = os.getenv("PROD_{}_USER_API".format(institution))
+    api_key = settings.ALMA_API_KEY[institution]
+    api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
+    status, user_requests = api.get_user_requests(user.id_alma,'HOLD',limit = 50,accept='json')
+    logger.info("{} --> {} : {}".format(institution,status,user_requests))
+    if status == "Success":
+        # print("{} --> {} : {}".format(institution,status,requests['total_record_count']))
+        if  user_requests['total_record_count'] > 0:
+            for user_request in user_requests["user_request"]:                   
+                if user_request['pickup_location_library'] == library and "last_interest_date" not in user_request:
+                    pickup_location_library = user_request['pickup_location_library']
+                    if library not in  user_carts_list:
+                        user_carts_list[library] = {}
+                        user_carts_list[library]["user_request_list"] = []
+                        user_carts_list[library]["item_from_other_library"] = False
+                        user_carts_list[library]["name"] = user_request['pickup_location']
+                    user_request_item = get_user_request_item(user_request,api_key,user)
+                    if user_request_item.library_id != library :
+                        user_carts_list[library]["item_from_other_library"] = True                 
+                    user_carts_list[library]["user_request_list"].append(user_request_item)
+    elif status == "Error":
+        logger.error(user_request)
+        return True,user_requests
+    return False,user_carts_list       
+
 
 def delete_user_request(user_id,user_request_id,institution):
     api_key = settings.ALMA_API_KEY[institution]
