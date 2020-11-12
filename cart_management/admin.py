@@ -82,66 +82,66 @@ class AppointmentAdmin(admin.ModelAdmin):
     readonly_fields = ['user_formated', 'library']
     inlines = [ItemsInline]
 
-    def get_urls(self):
+    # def get_urls(self):
 
-        # get the default urls
-        urls = super(AppointmentAdmin, self).get_urls()
+    #     # get the default urls
+    #     urls = super(AppointmentAdmin, self).get_urls()
 
-        # define security urls
-        security_urls = [
-            url(r'^add/$', self.admin_site.admin_view(self.add_rdv_form)),
-            url(r'^confirm/$', self.admin_site.admin_view(self.add_rdv_choose)),
-            url(r'^rdv/$', self.admin_site.admin_view(self.rdv))
-            # Add here more urls if you want following same logic
-        ]
+    #     # define security urls
+    #     security_urls = [
+    #         url(r'^add/$', self.admin_site.admin_view(self.add_rdv_form)),
+    #         url(r'^confirm/$', self.admin_site.admin_view(self.add_rdv_choose)),
+    #         url(r'^rdv/$', self.admin_site.admin_view(self.rdv))
+    #         # Add here more urls if you want following same logic
+    #     ]
 
-        # Make sure here you place your added urls first than the admin default urls
-        return security_urls + urls
+    #     # Make sure here you place your added urls first than the admin default urls
+    #     return security_urls + urls
 
-    # Your view definition fn
-    def add_rdv_form(self, request):
-        if request.method == 'POST':
-            # create a form instance and populate it with data from the request:
-            form = NameForm(request.POST)
-            # check whether it's valid:
-            if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
-                return HttpResponseRedirect('/thanks/')
+    # # Your view definition fn
+    # def add_rdv_form(self, request):
+    #     if request.method == 'POST':
+    #         # create a form instance and populate it with data from the request:
+    #         form = NameForm(request.POST)
+    #         # check whether it's valid:
+    #         if form.is_valid():
+    #         # process the data in form.cleaned_data as required
+    #         # ...
+    #         # redirect to a new URL:
+    #             return HttpResponseRedirect('/thanks/')
 
-        # if a GET (or any other method) we'll create a blank form
-        else:
-            form = NameForm()
+    #     # if a GET (or any other method) we'll create a blank form
+    #     else:
+    #         form = NameForm()
 
-        context = dict(
-            self.admin_site.each_context(request), # Include common variables for rendering the admin template.
-            something="test",
-            form=form
-        )
-        return TemplateResponse(request, "admin/add_rdv.html", context)
+    #     context = dict(
+    #         self.admin_site.each_context(request), # Include common variables for rendering the admin template.
+    #         something="test",
+    #         form=form
+    #     )
+    #     return TemplateResponse(request, "admin/add_rdv.html", context)
 
-    def add_rdv_choose(self, request):
-        self.admin_site.each_context(request), # Include common variables for rendering the admin template.
-        user_id = request.POST['id_lecteur']
-        library = PickupLocation.objects.get(id_alma=request.POST['library'])
-        error, lecteur = services_request.get_user_info(user_id,library.institution)
-        if error :
-            messages.error(request, 'Utilisateur inconnu.')
-            return HttpResponseRedirect('/admin/cart_management/appointment/add/')
-        error, user_carts = services_request.get_user_carts_admin(lecteur,library.institution,request.POST['library'])
-        if error :
-            messages.error(request, 'Pas de réservations.')
-            return HttpResponseRedirect('/admin/cart_management/appointment/add/')
-        if not user_carts :
-            messages.error(request, 'Pas de réservations.')
-            return HttpResponseRedirect('/admin/cart_management/appointment/add/')
-        user_requests_list = user_carts[request.POST['library']]["user_request_list"]
-        lecteur.save()
-        resas = services_rdv.Resas(library,library.open_hour,library.close_hour, library.plot_number,library.handling_time,library.days_for_booking)
-        list_hours = resas.get_list_hours_for_public_view()
+    # def add_rdv_choose(self, request):
+    #     self.admin_site.each_context(request), # Include common variables for rendering the admin template.
+    #     user_id = request.POST['id_lecteur']
+    #     library = PickupLocation.objects.get(id_alma=request.POST['library'])
+    #     error, lecteur = services_request.get_user_info(user_id,library.institution)
+    #     if error :
+    #         messages.error(request, 'Utilisateur inconnu.')
+    #         return HttpResponseRedirect('/admin/cart_management/appointment/add/')
+    #     error, user_carts = services_request.get_user_carts_admin(lecteur,library.institution,request.POST['library'])
+    #     if error :
+    #         messages.error(request, 'Pas de réservations.')
+    #         return HttpResponseRedirect('/admin/cart_management/appointment/add/')
+    #     if not user_carts :
+    #         messages.error(request, 'Pas de réservations.')
+    #         return HttpResponseRedirect('/admin/cart_management/appointment/add/')
+    #     user_requests_list = user_carts[request.POST['library']]["user_request_list"]
+    #     lecteur.save()
+    #     resas = services_rdv.Resas(library,library.open_hour,library.close_hour, library.plot_number,library.handling_time,library.days_for_booking)
+    #     list_hours = resas.get_list_hours_for_public_view()
         
-        return TemplateResponse(request, "admin/choose_rdv.html",locals())
+    #     return TemplateResponse(request, "admin/choose_rdv.html",locals())
         
 
     def user_formated(self, obj):
