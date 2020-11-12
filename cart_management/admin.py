@@ -90,7 +90,7 @@ class AppointmentAdmin(admin.ModelAdmin):
         # define security urls
         security_urls = [
             url(r'^add/$', self.admin_site.admin_view(self.add_rdv_form)),
-            url(r'^confirm/$', self.admin_site.admin_view(self.add_rdv_choose))
+            url(r'^confirm/$', self.admin_site.admin_view(self.add_rdv_choose)),
             url(r'^rdv/$', self.admin_site.admin_view(self.rdv))
             # Add here more urls if you want following same logic
         ]
