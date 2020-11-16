@@ -36,16 +36,16 @@ class DaysOfWeek(models.Model):
         verbose_name_plural = "Jours d'ouvertures"
 
 
-class ClosedDays(models.Model):
-    date = models.DateField(verbose_name=u"Date de fermetures de la bibliothèque")
+# class ClosedDays(models.Model):
+#     date = models.DateField(verbose_name=u"Date de fermetures de la bibliothèque")
 
-    def __str__(self):
-        return self.date.strftime('%d/%m/%Y')
+#     def __str__(self):
+#         return self.date.strftime('%d/%m/%Y')
     
 
-    class Meta:
-        verbose_name = "Jour"
-        verbose_name_plural = "Jours de fermetures"
+#     class Meta:
+#         verbose_name = "Jour"
+#         verbose_name_plural = "Jours de fermetures"
 
 class PickupLocation(models.Model):
     UB = 'UB'
@@ -69,7 +69,7 @@ class PickupLocation(models.Model):
     open_hour = models.IntegerField(verbose_name=u"Heure d'ouverture du service de retrait",default=9)
     close_hour = models.IntegerField(verbose_name=u"Heure de fermeture du service de retrait",default=17)
     opening_days = models.ManyToManyField(DaysOfWeek)
-    closed_days = models.ManyToManyField(ClosedDays)
+    # closed_days = models.ManyToManyField(ClosedDays)
     mid_day_break = models.BooleanField(default=False,verbose_name=u"Fermeture méridienne (bibliothèque fermée entre 12h & 14h)")
     days_for_booking = models.IntegerField(verbose_name=u"Nombre de jours à proposer pour la prise de rdv",default=10)
     email = models.EmailField(verbose_name=u"Adresse vers laquelle envoyer la liste des documents réservés",default="")
@@ -106,8 +106,8 @@ class Appointment(models.Model):
         verbose_name=u"Bibliothèque de retrait"
     )
     is_done = models.BooleanField(default=False,verbose_name=u"Commande retirée ?")
-    is_peb = models.BooleanField(default=False,verbose_name=u"Demande de PEB ?")
-    peb_descr = models.CharField(max_length=500,verbose_name=u"Descriptif PEB :",blank=True,default='')
+    # is_peb = models.BooleanField(default=False,verbose_name=u"Demande de PEB ?")
+    # peb_descr = models.CharField(max_length=500,verbose_name=u"Descriptif PEB :",blank=True,default='')
     class Meta:
         unique_together = (('date', 'library'),)
         verbose_name = "Rendez-vous"
