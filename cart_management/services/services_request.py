@@ -141,7 +141,7 @@ def get_user_carts(user,institution):
             # print("{} --> {} : {}".format(institution,status,requests['total_record_count']))
             if  user_requests['total_record_count'] > 0:
                 for user_request in user_requests["user_request"]:                   
-                    if user_request["request_status"] == 'IN_PROCESS' and "last_interest_date" not in user_request:
+                    if "last_interest_date" not in user_request:
                         pickup_location_library = user_request['pickup_location_library']
                         try:
                             pickuplocation = PickupLocation.objects.get(id_alma=user_request['pickup_location_library'])

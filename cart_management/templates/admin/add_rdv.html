@@ -1,10 +1,27 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
 <h1>Ajout d'un rendez-vous</h1>
-<form action="/admin/cart_management/appointment/confirm/" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
+
+<form action="" method="post">
+{% csrf_token %}
+    <div class="col-sm-9 form-fields">
+        <div class="panel panel-default form-panel">
+            <div class="panel-body">
+                <fieldset class="module aligned">
+                    {% for field in form %}
+                    <div class="form-row form-group field-{{ field.id_for_label }}">
+                        {{ field.errors }}
+                        {{ field.label_tag }} {{ field }}
+                        {% if field.help_text %}
+                        <p class="help">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+{% endfor %}
+                    <input type="submit" value="Submit">
+                </fieldset>
+            </div>
+        </div>
+    </div>
 </form>
-{{ something }}
 {% endblock %}
+

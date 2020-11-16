@@ -1,11 +1,17 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
+<h1>Choix d'une plage horaire</h1>
 <div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h2 class="display-4">Le lecteur a {{ user_requests_list|length }} document(s) réservé(s) pour la <b>{{ pickup_loc.name }}:</b></h2>
+{% if locals.peb %}
+    <h2 class="display-4">Demande de PEB pour <b>{{ locals.lecteur.full_name }}</b> à la <b>{{ locals.library.name }}:</b></h2>
+{% else %}
+    <h2 class="display-4"><b>{{ locals.lecteur.full_name }}</b> a {{ locals.user_requests_list|length }} document(s) réservé(s) pour la <b>{{ locals.library.name }}:</b></h2>
+{% endif %}
 </div>
 <div class="container">
     <div class="content-accordion">
         <div class="accordion" id="accordionExample">
+        {% if not locals.peb %}
             <div class="card shopping-cart">
                 <div class="card-header" id="headingOne">
                     <a class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -23,28 +29,28 @@
                     </div>
                 </div>
             </div>
+        {% endif %}
             <div class="card apointment-list">
                 <div class="card-header" id="headingTwo">
                 
-                    <a class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    
                     <h2 class="mb-0">
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                    Chosissez le créneau de retrait de vos documents 
-                    <i class="pull-right fa fa-plus"></i>
+                    Chosissez le créneau de retrait des documents : 
                     </h2>
                     </a>
                 
                 </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                <div >
                 <div class="card-body">
+                {% if locals.peb %}
+                    {% include './resa_admin_peb.html' %}
+                {% else %}
                     {% include './resa_admin.html' %}
+                {% endif %}
                 </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<h1>Choix d'une plage horaire</h1>
-<h2>{{ lecteur.last_name }} -- {{ library.name }}</h2>
-{{ lecteur.last_name }}
 {% endblock %}

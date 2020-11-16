@@ -14,7 +14,7 @@
             <td>{{ hour }}</td>
                 {% else %}
             <td>
-                <form name="form_submit_rdv" action="/admin/cart_management/appointment/add_rdv/{{ locals.library.id_alma }}/{{ locals.user_id }}/{{ hour|date:"Y-m-d H:i:s" }}" onclick="return confirm('Retirer votre commande le {{ hour|date:"D d M Y" }} à {{ hour|time:"H:i" }} ?');" method="get" class="form">
+                <form name="form_submit_rdv" action="/admin/cart_management/appointment/add_rdv_peb/{{ locals.library.id_alma }}/{{ locals.user_id }}/{{ hour|date:"Y-m-d H:i:s" }}" onclick="return confirm('Retirer votre commande le {{ hour|date:"D d M Y" }} à {{ hour|time:"H:i" }} ?');" method="get" class="form">
                     <button type="submit" id="button_submit_rdv"class="btn btn-success btn-xs">{{ hour|time:"H:i" }}</button>
                 </form>                                    
             </td>

@@ -8,10 +8,10 @@ class Resas(object):
     :param date_to: Date de fin de la période
     :return: Générateur
     """
-    def __init__(self,pickup_loc,hour_from,hour_to,plots_number,handling_time,days_for_booking,view_type='public'):
+    def __init__(self,pickup_loc,hour_from,hour_to,plots_number,handling_time,days_for_booking,admin=False):
 
         self.list_days = []
-        self.view_type=view_type
+        self.admin = admin
         self.pickup_loc = pickup_loc
         self.hour_from = hour_from
         self.hour_to = hour_to
@@ -20,6 +20,7 @@ class Resas(object):
         pl = PickupLocation.objects.get(name=pickup_loc)
         self.mid_day_break = pl.mid_day_break
         self.opening_days = pl.opening_days.all().values_list('day_no', flat=True)
+        self.closed_days = pl.closed_days.all().values_list('date', flat=True)
         date_from = self.get_date_from()
         date_to = date_from + timedelta(days=days_for_booking)
         self.rdvs = self.get_appointments(date_from,date_to)       
@@ -27,18 +28,20 @@ class Resas(object):
         while x <= days_for_booking: 
         # for i in range(days_for_booking): 
             # Un jour est ouvré s'il n'est ni férié, ni samedi, ni dimanche
-            if not self.is_holiday(date_from) and date_from.isoweekday() not in [6, 7] and date_from.isoweekday() in self.opening_days: 
+            if not self.is_holiday(date_from) and date_from.isoweekday() not in [6, 7] and date_from.isoweekday() in self.opening_days and date_from.date() not in self.closed_days:  
                 # my_object = {date_from : my_hours}
                 self.list_days.append(date_from)
                 x +=1
             date_from += timedelta(days=1)
-        print(self.rdvs)
 
     def get_date_from(self):
         now = datetime.today()
         # start_date = now.replace(hour=0, minute=0, second=0, microsecond=0,tzinfo=pytz.timezone('Europe/Paris'))
         start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        return start_date + timedelta(days=self.handling_time)
+        if self.admin :
+            return start_date
+        else :
+            return start_date + timedelta(days=self.handling_time)
         # print(start_date.isoweekday)
         # if start_date.isoweekday in [1,2,3,7]:
         #     return start_date + timedelta(days=self.handling_time)
