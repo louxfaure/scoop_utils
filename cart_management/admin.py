@@ -47,7 +47,7 @@ class ItemsAdmin(admin.ModelAdmin):
 
 class ItemsInline(admin.TabularInline):
     model = Items
-    fields = ['title','library_name', 'location','call_number','status']
+    fields = ['user_request_id','title','library_name', 'location','call_number','status']
     readonly_fields = ('status',)
 
     def status(self,obj):

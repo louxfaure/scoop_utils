@@ -172,7 +172,7 @@ class Items(models.Model):
     )
 
     def __str__(self):
-        return self.user_request_id
+        return str(self.user_request_id)
 
     class Meta:
         verbose_name = "Document réservé"
