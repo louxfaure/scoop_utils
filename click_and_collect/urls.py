@@ -18,9 +18,9 @@ from django.urls import include,path
 
 
 urlpatterns = [
-    path('grappelli/', include('grappelli.urls')), # grappelli URLS
+
     path('login/', include('django.contrib.auth.urls')),
-    # path('panier/', include('panier.urls')),
     path('panier/', include('cart_management.urls')),
+    # path('webhook/', include('webhook.urls')),
     path('admin/', admin.site.urls),
 ]

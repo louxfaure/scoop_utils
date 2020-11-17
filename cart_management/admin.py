@@ -251,11 +251,6 @@ class AppointmentAdmin(admin.ModelAdmin):
         if error :
             messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
             return HttpResponseRedirect('/admin/cart_management/appointment/add/')
-        ##On raffraichi et récupère la liste des résa du lecteur pour la bib
-        error,title_list = services_request.refresh_user_request(user,pickup_loc)
-        if error :
-            messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
-            return HttpResponseRedirect('/admin/cart_management/appointment/add/')
         # On créé un rdv pour l'usager
         appointment = Appointment(date=date_rdv, person=user, library=pickup_loc,is_peb=True)
         try:
