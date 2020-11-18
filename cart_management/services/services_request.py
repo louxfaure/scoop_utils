@@ -219,7 +219,7 @@ def refresh_user_request(user,pickup_location):
     if status == "Success":
         # print("{} --> {} : {}".format(institution,status,requests['total_record_count']))
         for alma_user_request in alma_user_requests_list["user_request"]:
-            if alma_user_request["request_status"] == 'IN_PROCESS' and "last_interest_date" not in alma_user_request and alma_user_request['pickup_location_library'] == pickup_location.id_alma :
+            if "last_interest_date" not in alma_user_request and alma_user_request['pickup_location_library'] == pickup_location.id_alma :
                 if alma_user_request["request_id"] in cart_user_requests_list :
                     cart_user_requests_list.remove(alma_user_request["request_id"])
                 else:
@@ -244,12 +244,13 @@ def update_user_request(appointment,user_requests_list,institution):
     Returns:
         [str] -- statut du traitement
     """
-    print(institution)
+    print(user_requests_list)
     api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     for cart_user_request in user_requests_list:
         id_lecteur = cart_user_request.person
         id_resa = cart_user_request.user_request_id
+        logger.error(id_resa)
         statut, alma_user_request = api.get_user_request(id_lecteur,id_resa,accept='json')
         print("{} -- {}".format(statut,json.dumps(alma_user_request, indent=2)))    
         alma_user_request["last_interest_date"] = appointment.get_date_formatee('alma')

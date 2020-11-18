@@ -240,7 +240,7 @@ class AppointmentAdmin(admin.ModelAdmin):
             self.admin_site.each_context(request), # Include common variables for rendering the admin template.
             locals = locals()
         )
-        messages.success(request, 'Le rendez-vosu a été créé avec succès.')
+        messages.success(request, 'Le rendez-vous a été créé avec succès.')
         return HttpResponseRedirect("/admin/cart_management/appointment/?library__id_alma__exact={}".format(pickup_loc_id))
 
     def rdv_peb(self,request, pickup_loc_id, user_id, date_rdv):
