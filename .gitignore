@@ -5,3 +5,4 @@ settings.py
 wsgi.py
 *.sqlite3
 db.json
+/migrations/
