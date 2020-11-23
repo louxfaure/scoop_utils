@@ -51,7 +51,7 @@ class ItemsInline(admin.TabularInline):
     model = Items
     fields = ['user_request_id','title','library_name', 'location','call_number','status']
     # readonly_fields = ('status','created','modified')
-    readonly_fields = ('status')
+    # readonly_fields = ('status',)
     def status(self,obj):
         return obj.get_item_status()
 
