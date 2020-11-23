@@ -41,17 +41,16 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Items)
 class ItemsAdmin(admin.ModelAdmin):
-    # list_display = ('created','title', 'pickuplocation', 'person', 'appointment')
-    list_display = ('title', 'pickuplocation', 'person', 'appointment')
+    list_display = ('created','title', 'pickuplocation', 'person', 'appointment')
     ordering = ('pickuplocation', 'person',)
     search_fields = ('person', 'pickuplocation')
-    # readonly_fields = ('created','modified')
+    readonly_fields = ('created','modified')
 
 class ItemsInline(admin.TabularInline):
     model = Items
     fields = ['user_request_id','title','library_name', 'location','call_number','status']
-    # readonly_fields = ('status','created','modified')
-    # readonly_fields = ('status',)
+    readonly_fields = ('status','created','modified')
+    
     def status(self,obj):
         return obj.get_item_status()
 

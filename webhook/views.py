@@ -1,4 +1,5 @@
 from django.http import HttpResponse, JsonResponse
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .services import *
@@ -31,6 +32,8 @@ def webhook(request):
         else :
             return HttpResponse("Le HMAC n'apas été validé",status=500)
     else :
-        challenge = { 'challenge' : request.GET["challenge"] } 
-        print("Whololo !!!!")
+        try: 
+            challenge = { 'challenge' : request.GET["challenge"] } 
+        except MultiValueDictKeyError:
+            return HttpResponse("Bien reçu. Pas de Challenge.")
         return JsonResponse(challenge)
