@@ -113,7 +113,6 @@ class Resas(object):
             if self.mid_day_break == True and start_hour in [12,13]:
                 start_hour += 1
                 continue
-            print(start_hour)
             for plot in range(self.plots_number):
                 plot = []
                 for day in self.list_days:
@@ -133,7 +132,6 @@ class Resas(object):
         start_hour = self.hour_from
         end_hour = self.hour_to
         while start_hour <= end_hour:
-            # print(start_hour)
             x = 0
             for plot in range(self.plots_number):
                 plot = []

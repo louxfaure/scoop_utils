@@ -26,14 +26,19 @@ def index(request,user_id,institution_id):
     return redirect('homepage')
 
 def cart_homepage(request):
+    """Page d'accueil du service regarde si l'usager existe et a des réservations.
+    Si oui, groupe les résa par institution et par bibliothèque
+    Renvoie vers la page de validation du panier et de choix d'une plage de rdv
+    """
     user_id = request.session.get('user_id')
     institution_id = request.session.get('institution_id')
-    logger.error("Je viens de la vue")
+    # On récupère les infos du lecteur
     error, user = services_request.get_user_info(user_id,institution_id)
     if error :
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return render(request, "cart_management/error.html", locals())
-    error, user_carts = services_request.get_user_carts(user,institution_id)
+    # On récupère les résas de l'usager
+    error, user_carts = services_request.get_user_carts(user)
     if error :
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return render(request, "cart_management/error.html", locals())
@@ -65,21 +70,20 @@ def cart_validation(request, pickup_loc_id):
 def request_delation(request, request_id, institution, pickup_loc_id):
     user_id = request.session.get('user_id')
     pickup_loc = PickupLocation.objects.get(id_alma=pickup_loc_id)
-    #Je lance la suppression de la deamnde
-    reponse = services_request.delete_user_request(user_id, request_id, institution)
-    if reponse == "Success" :
-        #Je vais supprimer la demande en base
-        deleted_request = Items.objects.get(user_request_id = request_id)
+    deleted_request = Items.objects.get(user_request_id = request_id)
+    try:
         deleted_request.delete()
-        request_list = request.session.get('cart_list')
-        #Il est possible qu'à l'issue de la suppression de la réservation la panier soit vide. On renvoi alors vers la page d'accueil qui rafraichira toutes données de réservation
-        user_requests_nb = Items.objects.filter(pickuplocation=pickup_loc_id).filter(person=user_id).filter(appointment__isnull=True).order_by('library_name', 'location').count()
-        if user_requests_nb == 0:
-            messages.success(request, "Le document a été retiré de votre panier. Vous n'avez plus de résearvation en cours pour la bibliothèque {}".format(pickup_loc.name))
-            return redirect('homepage')
-        messages.success(request, "Le document a été retiré de votre panier.")
-    else:
-        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
+    except:
+        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
+    #Je lance la suppression de la demande
+    reponse = services_request.delete_user_request(user_id, request_id, institution)
+    request_list = request.session.get('cart_list')
+    #Il est possible qu'à l'issue de la suppression de la réservation la panier soit vide. On renvoi alors vers la page d'accueil qui rafraichira toutes données de réservation
+    user_requests_nb = Items.objects.filter(pickuplocation=pickup_loc_id).filter(person=user_id).filter(appointment__isnull=True).order_by('library_name', 'location').count()
+    if user_requests_nb == 0:
+        messages.success(request, "Le document a été retiré de votre panier. Vous n'avez plus de résearvation en cours pour la bibliothèque {}".format(pickup_loc.name))
+        return redirect('homepage')
+    messages.success(request, "Le document a été retiré de votre panier.")
     return redirect('cart-validation', pickup_loc_id=pickup_loc_id)
 
 def rdv(request, pickup_loc_id, user_id, date_rdv):

@@ -8,7 +8,6 @@
     {% bootstrap_css %}         {# Embed Bootstrap CSS #}
     {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
     <link rel="stylesheet" type="text/css" href="{% static "/cart_management/style.css" %}" />
-    <script src="{% static "gestion_lecteurs/js/script.js" %}"></script>
     <script src="https://use.fontawesome.com/c560c025cf.js"></script>
    <title>{% block title %}Babord + - Clic et collecte{% endblock %}</title>
 
@@ -17,7 +16,7 @@
 <header>
 <nav class="navbar navbar-light bg-light flex-nowrap justify-content-between">
   <span class="col-4 h2">
-    <img src="{% static "/cart_management/Rebub_Favicon_Babordplus_color.svg" %}" width="64" height="64" alt="">    
+    <img src="{% static '/cart_management/'|add:request.session.institution_id|add:'_Favicon_Babordplus_color.svg' %}" width="64" height="64" alt="">    
     <span class="align-middle">Clic et Collecte</span>
   </span>
     <span class="col-4 text-center">

@@ -21,6 +21,6 @@ urlpatterns = [
 
     path('login/', include('django.contrib.auth.urls')),
     path('panier/', include('cart_management.urls')),
-    # path('webhook/', include('webhook.urls')),
+    path('webhook/', include('webhook.urls')),
     path('admin/', admin.site.urls),
 ]

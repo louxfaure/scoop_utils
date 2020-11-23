@@ -1,6 +1,8 @@
 from django.db import models
+from django.utils import timezone
 from datetime import datetime
 from django.contrib.auth.models import User
+
 # from django.utils.safestring import SafeString
 
 
@@ -69,7 +71,7 @@ class PickupLocation(models.Model):
     open_hour = models.IntegerField(verbose_name=u"Heure d'ouverture du service de retrait",default=9)
     close_hour = models.IntegerField(verbose_name=u"Heure de fermeture du service de retrait",default=17)
     opening_days = models.ManyToManyField(DaysOfWeek)
-    closed_days = models.ManyToManyField(ClosedDays)
+    closed_days = models.ManyToManyField(ClosedDays,blank=True)
     mid_day_break = models.BooleanField(default=False,verbose_name=u"Fermeture méridienne (bibliothèque fermée entre 12h & 14h)")
     days_for_booking = models.IntegerField(verbose_name=u"Nombre de jours à proposer pour la prise de rdv",default=10)
     email = models.EmailField(verbose_name=u"Adresse vers laquelle envoyer la liste des documents réservés",default="")
@@ -145,6 +147,8 @@ class Appointment(models.Model):
     # get_number_of_canceled_items.short_description = u'Nombre de documennts annulés'
 
 class Items(models.Model):
+    created = models.DateTimeField(auto_now_add=True, verbose_name=u"Date et heure de création")
+    modified = models.DateTimeField(auto_now=True,verbose_name=u"Date et heure de modification")
     user_request_id =  models.CharField(max_length=16,primary_key=True,verbose_name=u"Identifiant de la réservation")
     title = models.CharField(max_length=500,verbose_name=u"Titre de l'exemplaire")
     item_barcode = models.CharField(max_length=30,verbose_name=u"Code-barres",blank=True, null=True)
@@ -154,6 +158,7 @@ class Items(models.Model):
     call_number = models.CharField(max_length=30,verbose_name=u"Cote de l'exemplaire",blank=True, null=True)
     description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (système)",blank=True, null=True)
     manual_description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (usager)",blank=True, null=True)
+    status = models.CharField(max_length=80,verbose_name=u"Statut de la réservation",blank=True, null=True)
     person = models.ForeignKey(
         Person,
         verbose_name=u"Demandeur",
@@ -171,6 +176,7 @@ class Items(models.Model):
         null=True,
     )
 
+
     def __str__(self):
         return str(self.user_request_id)
 
@@ -181,7 +187,8 @@ class Items(models.Model):
     def get_item_status(self):
         from .services import services_request
 
-        return services_request.get_request_user_status(self.person.id_alma,self.user_request_id,self.pickuplocation.institution)  
+        return services_request.get_request_user_status(self.person.id_alma,self.user_request_id,self.pickuplocation.institution)
+
 
 # Comptes admin ajout d'un champ
 class Staff(models.Model):

@@ -1,31 +1,36 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-import base64
-import hashlib
-import hmac
+from .services import *
+from cart_management.services import services_request, services_rdv
 
+import json
 
 @csrf_exempt
 def webhook(request):
     print("Whouau !!!!")
-    secret_key = '1234'
     if request.method == 'POST':
-        # On valide la siganture
-        signature = request.META.get('HTTP_X_EXL_SIGNATURE')
-        if not signature: 
-                return HttpResponse(status=500)
-        body = request.body
-        key = secret_key.encode('utf-8')
-        received_hmac_b64 = signature.encode('utf-8')
-        generated_hmac = hmac.new(key=key, msg=body, digestmod=hashlib.sha256).digest()
-        generated_hmac_b64 = base64.b64encode(generated_hmac)
-        match = hmac.compare_digest(received_hmac_b64, generated_hmac_b64)
-        if not match: 
-                return HttpResponse(status=500)
+        if test_hmac(request) :
+            # resa = request.body
+            resa = json.loads(request.body)
+            print(json.dumps(resa, indent=4, sort_keys=True))
+            event=resa["event"]["value"]
+            type_resa=resa["user_request"]["request_type"]
+            ss_type_resa=resa["user_request"]["request_sub_type"]["value"]
+            alma_inst = resa["institution"]["value"]
+            inst = alma_inst.replace("33PUDB_","")
+            api_key = settings.ALMA_API_KEY[inst]
+            print("{} -- {} -- {}".format(event,type_resa,ss_type_resa))
+            if type_resa == "HOLD" and ss_type_resa == "PATRON_PHYSICAL" :
+                message, status = event_dispatcher(event,api_key,resa)
+                return HttpResponse(message, status=status)
+            else:
+                return HttpResponse("Type de requête non traité", status=418)    
 
-        print(request.body)
-        return HttpResponse('Hello, world. This is the webhook response.')
+            
+        else :
+            return HttpResponse("Le HMAC n'apas été validé",status=500)
     else :
+        challenge = { 'challenge' : request.GET["challenge"] } 
         print("Whololo !!!!")
-        return HttpResponse(status=200)
+        return JsonResponse(challenge)

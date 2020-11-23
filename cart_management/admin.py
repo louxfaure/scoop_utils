@@ -41,14 +41,15 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Items)
 class ItemsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'pickuplocation', 'person', 'appointment')
+    list_display = ('created','title', 'pickuplocation', 'person', 'appointment')
     ordering = ('pickuplocation', 'person',)
     search_fields = ('person', 'pickuplocation')
+    readonly_fields = ('created','modified')
 
 class ItemsInline(admin.TabularInline):
     model = Items
     fields = ['user_request_id','title','library_name', 'location','call_number','status']
-    readonly_fields = ('status',)
+    readonly_fields = ('status','created','modified')
 
     def status(self,obj):
         return obj.get_item_status()
@@ -268,9 +269,9 @@ class AppointmentAdmin(admin.ModelAdmin):
             return HttpResponseRedirect('/admin/cart_management/appointment/confirm_peb/{}/{}'.format(pickup_loc_id,user_id)) 
         # for title in title_list 
         #2 - On envoi un mail à l'usager
-        plain_message = loader.render_to_string("cart_management/user_mail_message.txt", locals())
+        plain_message = loader.render_to_string("cart_management/user_mail_message_peb.txt", locals())
         send_mail(
-            "{} : Votre demande de Clique et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+            "{} : Votre rendez-vous pour le Prêt entre Bibliothèques est validé pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
             plain_message,
             pickup_loc.from_email,
             [user.email],

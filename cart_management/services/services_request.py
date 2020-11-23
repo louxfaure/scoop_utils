@@ -6,8 +6,6 @@ from .Alma_services import Alma_Apis_Users, Alma_Apis_Records
 from ..models import Person,PickupLocation, Items
 from django.conf import settings
 
-# INSTITUTIONS_LIST = ['NETWORK','UB','UBM','IEP','INP','BXSA']
-INSTITUTIONS_LIST = ['UB']
 #Initialisation des logs
 logger = logging.getLogger(__name__)
 
@@ -63,6 +61,7 @@ def get_holding_info(holdings_list,library):
                 holding_info['call_number'] = holding['call_number']
                 holding_info['location'] = holding['location']['desc']
                 holding_info['library_id'] = holding['library']['value']
+                holding_info['library_name'] = holding['library']['desc']
                 return holding_info
     if library in ['Bib. pluridisciplinaire','Spot Pessac','BU Sciences et techniques'] :
         for holding in holdings_list:
@@ -70,6 +69,7 @@ def get_holding_info(holdings_list,library):
                     holding_info['call_number'] = holding['call_number']
                     holding_info['location'] = holding['location']['desc']
                     holding_info['library_id'] = holding['library']['value']
+                    holding_info['library_name'] = holding['library']['desc']
                     return holding_info
     holding_info['call_number'] = "None"
     holding_info['location'] = "None"
@@ -89,39 +89,45 @@ def get_user_request_item(user_request,api_key,user):
     """
     record_api = Alma_Apis_Records.AlmaRecords(api_key, region='EU', service='pickup_collect')
     logger.info(user_request)
-    user_request_item = Items(  user_request_id = user_request['request_id'],
-                                library_name = user_request['managed_by_library'],
-                                library_id = None,
-                                location = None,
-                                call_number = None,
-                                title = user_request['title'],
-                                item_barcode = user_request['barcode'],
-                                description = user_request['description'] if 'description' in user_request else None,
-                                manual_description = user_request['manual_description'] if 'manual_description' in user_request else None,
-                                pickuplocation = PickupLocation.objects.get(id_alma=user_request['pickup_location_library']),
-                                person = user
-                        )
-    if user_request['barcode'] is not None:
-        status,item = record_api.get_item_with_barcode(user_request['barcode'],accept='json')
-        if status == "Success":
-            user_request_item.call_number = item['holding_data']['call_number']
-            user_request_item.location = item['item_data']['location']['desc']
-            user_request_item.library_id = item['item_data']['library']['value']
-    # Cas d'une reservation qui a été placée sur l'exemplaire on va se baser sur les informatiosn de la holding
-    else:
-        #1- On va chercher la liste des holdinggs sous la notice biblio
-        status,reponse=record_api.get_holdings_list(user_request['mms_id'],accept='json')
-        if status == "Success":
-            holding = get_holding_info(reponse['holding'],user_request['managed_by_library'])
-            user_request_item.call_number = holding['call_number']
-            user_request_item.location = holding['location']
-            user_request_item.library_id = holding['library_id']
-    user_request_item.save()
+    try:
+        user_request_item = Items.objects.get(user_request_id=user_request['request_id'])
+    except Items.DoesNotExist:
+        user_request_item = Items(  user_request_id = user_request['request_id'],
+                                    library_name = user_request['managed_by_library'],
+                                    library_id = None,
+                                    location = None,
+                                    call_number = None,
+                                    title = user_request['title'],
+                                    item_barcode = user_request['barcode'],
+                                    description = user_request['description'] if 'description' in user_request else None,
+                                    manual_description = user_request['manual_description'] if 'manual_description' in user_request else None,
+                                    pickuplocation = PickupLocation.objects.get(id_alma=user_request['pickup_location_library']),
+                                    person = user,
+                                    status = user_request['request_status']
+                            )
+        if user_request['barcode'] is not None:
+            status,item = record_api.get_item_with_barcode(user_request['barcode'],accept='json')
+            if status == "Success":
+                user_request_item.call_number = item['holding_data']['call_number']
+                user_request_item.location = item['item_data']['location']['desc']
+                user_request_item.library_id = item['item_data']['library']['value']
+                user_request_item.library_name = item['item_data']['library']['desc']
+        # Cas d'une reservation qui a été placée sur l'exemplaire on va se baser sur les informatiosn de la holding
+        else:
+            #1- On va chercher la liste des holdinggs sous la notice biblio
+            status,reponse=record_api.get_holdings_list(user_request['mms_id'],accept='json')
+            if status == "Success":
+                holding = get_holding_info(reponse['holding'],user_request['managed_by_library'])
+                user_request_item.call_number = holding['call_number']
+                user_request_item.location = holding['location']
+                user_request_item.library_id = holding['library_id']
+                user_request_item.library_name = holding['library_name']
+        user_request_item.save()
     return user_request_item
 
 
 
-def get_user_carts(user,institution):
+def get_user_carts(user):
     """Return a list of carts. Cart are requests user placed on the same pickup library. 
 
     Arguments:
@@ -131,7 +137,7 @@ def get_user_carts(user,institution):
     
     #Search for user requests
     user_carts_list = {}
-    for institution in INSTITUTIONS_LIST :
+    for institution in settings.INSTITUTIONS_LIST :
         # api_key = os.getenv("PROD_{}_USER_API".format(institution))
         api_key = settings.ALMA_API_KEY[institution]
         api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
@@ -201,6 +207,8 @@ def delete_user_request(user_id,user_request_id,institution):
     api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     statut, reponse = api.delete_user_request(user_id,user_request_id,accept='json')
+    if reponse == "401694 -- Request not found" :
+        statut = "Success"
     return statut
 
 def refresh_user_request(user,pickup_location):
@@ -244,15 +252,15 @@ def update_user_request(appointment,user_requests_list,institution):
     Returns:
         [str] -- statut du traitement
     """
-    print(user_requests_list)
+    # print(user_requests_list)
     api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     for cart_user_request in user_requests_list:
         id_lecteur = cart_user_request.person
         id_resa = cart_user_request.user_request_id
-        logger.error(id_resa)
+        # logger.error(id_resa)
         statut, alma_user_request = api.get_user_request(id_lecteur,id_resa,accept='json')
-        print("{} -- {}".format(statut,json.dumps(alma_user_request, indent=2)))    
+        # print("{} -- {}".format(statut,json.dumps(alma_user_request, indent=2)))    
         alma_user_request["last_interest_date"] = appointment.get_date_formatee('alma')
         alma_user_request["comment"] = "Retrait du document prévu le {}".format(appointment.get_date_formatee('complet'))
         statut, reponse = api.update_user_request(id_lecteur,id_resa,json.dumps(alma_user_request),accept='json',content_type='json')
