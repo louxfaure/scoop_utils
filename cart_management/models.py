@@ -147,8 +147,8 @@ class Appointment(models.Model):
     # get_number_of_canceled_items.short_description = u'Nombre de documennts annulés'
 
 class Items(models.Model):
-    # created = models.DateTimeField(auto_now_add=True, verbose_name=u"Date et heure de création")
-    # modified = models.DateTimeField(auto_now=True,verbose_name=u"Date et heure de modification")
+    created = models.DateTimeField(auto_now_add=True, verbose_name=u"Date et heure de création")
+    modified = models.DateTimeField(auto_now=True,verbose_name=u"Date et heure de modification")
     user_request_id =  models.CharField(max_length=16,primary_key=True,verbose_name=u"Identifiant de la réservation")
     title = models.CharField(max_length=500,verbose_name=u"Titre de l'exemplaire")
     item_barcode = models.CharField(max_length=30,verbose_name=u"Code-barres",blank=True, null=True)
@@ -158,7 +158,7 @@ class Items(models.Model):
     call_number = models.CharField(max_length=30,verbose_name=u"Cote de l'exemplaire",blank=True, null=True)
     description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (système)",blank=True, null=True)
     manual_description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (usager)",blank=True, null=True)
-    # status = models.CharField(max_length=80,verbose_name=u"Statut de la réservation",blank=True, null=True)
+    status = models.CharField(max_length=80,verbose_name=u"Statut de la réservation",blank=True, null=True)
     person = models.ForeignKey(
         Person,
         verbose_name=u"Demandeur",
