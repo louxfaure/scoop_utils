@@ -101,7 +101,7 @@ class PebStatusFilter(admin.SimpleListFilter):
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('date', 'library','person','get_number_of_items','is_done', 'is_peb')
+    list_display = ('date', 'library','person','get_number_of_items','is_done', 'is_peb','note')
     list_filter = ['date','library', BookingStatusFilter, PebStatusFilter]
     fields = ('date','library','user_formated','is_done', 'is_peb','peb_descr','note')
     readonly_fields = ['user_formated', 'library']
