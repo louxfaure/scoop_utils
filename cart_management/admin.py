@@ -43,7 +43,7 @@ class PersonAdmin(admin.ModelAdmin):
 class ItemsAdmin(admin.ModelAdmin):
     list_display = ('created','title', 'pickuplocation', 'person', 'appointment')
     ordering = ('pickuplocation', 'person',)
-    search_fields = ('person', 'pickuplocation')
+    search_fields = ('created','title','item_barcode','person__last_name')
     readonly_fields = ('created','modified')
 
 class ItemsInline(admin.TabularInline):
@@ -103,7 +103,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_display = ('date', 'library','person','get_number_of_items','is_done', 'is_peb')
     list_filter = ['date','library', BookingStatusFilter, PebStatusFilter]
-    fields = ('date','library','user_formated','is_done', 'is_peb')
+    fields = ('date','library','user_formated','is_done', 'is_peb','peb_descr','note')
     readonly_fields = ['user_formated', 'library']
     inlines = [ItemsInline]
 

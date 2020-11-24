@@ -110,6 +110,7 @@ class Appointment(models.Model):
     is_done = models.BooleanField(default=False,verbose_name=u"Commande retirée ?")
     is_peb = models.BooleanField(default=False,verbose_name=u"Demande de PEB ?")
     peb_descr = models.CharField(max_length=500,verbose_name=u"Descriptif PEB :",blank=True,default='')
+    note = models.CharField(max_length=500,verbose_name=u"Note",blank=True,default='')
     class Meta:
         unique_together = (('date', 'library'),)
         verbose_name = "Rendez-vous"
