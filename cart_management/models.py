@@ -142,6 +142,19 @@ class Appointment(models.Model):
             return Items.objects.filter(appointment=self).count()
     get_number_of_items.short_description = u'Nombre de documents'
 
+    def get_on_shelf_count(self):
+        if self.is_peb :
+            return "PEB"
+        else :
+            return "{}/{}".format(Items.objects.filter(appointment=self,status='ON_HOLD_SHELF').count(), Items.objects.filter(appointment=self).count())
+    get_on_shelf_count.short_description = u'Documents sur lés étagères de réservations'
+
+    def get_on_load_count(self):
+        if self.is_peb :
+            return "PEB"
+        else :
+            return "{}/{}".format(Items.objects.filter(appointment=self,status='REQUEST_CLOSED').count(), Items.objects.filter(appointment=self).count())
+    get_on_load_count.short_description = u'Documents sur le compte du lecteur'
 
     # def get_number_of_canceled_items(self):
     #     return Items.objects.filter(appointment=self).filter(get_item_status='IN_PROCESS').count()

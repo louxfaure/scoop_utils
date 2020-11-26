@@ -101,7 +101,7 @@ class PebStatusFilter(admin.SimpleListFilter):
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('date', 'library','person','get_number_of_items','is_done', 'is_peb','note')
+    list_display = ('date', 'library','person','get_on_shelf_count','get_on_load_count','is_done', 'is_peb','note')
     list_filter = ['date','library', BookingStatusFilter, PebStatusFilter]
     fields = ('date','library','user_formated','is_done', 'is_peb','peb_descr','note')
     readonly_fields = ['user_formated', 'library']
@@ -227,8 +227,17 @@ class AppointmentAdmin(admin.ModelAdmin):
             return HttpResponseRedirect('/admin/cart_management/appointment/confirm/{}/{}'.format(pickup_loc_id,user_id)) 
         #1 - On va marquer dans Alma les résas comme traité en ajoutant une note et une date de fin d'intéret + on attache notre rdv à la résa
         services_request.update_user_request(appointment,title_list,pickup_loc.institution)
-        # for title in title_list 
-        #2 - On envoi un mail à l'usager
+        #2 - On envoi un mail à l'opérateur de commande 
+        html_message = loader.render_to_string("cart_management/admin_mail_message.html", locals())
+        send_mail(
+            "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+            "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
+            pickup_loc.from_email,
+            [pickup_loc.email],
+            fail_silently=False,
+            html_message=html_message,
+        )
+        #3 - On envoi un mail à l'usager
         plain_message = loader.render_to_string("cart_management/user_mail_message.txt", locals())
         send_mail(
             "{} : Votre demande de Clique et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
