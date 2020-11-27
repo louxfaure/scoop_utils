@@ -21,7 +21,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def index(request,user_id,institution_id):
-    request.session['institution_id'] = institution_id[6:]
+    request.session['institution_id'] = institution_id[7:]
     request.session['user_id'] = user_id
     return redirect('homepage')
 
