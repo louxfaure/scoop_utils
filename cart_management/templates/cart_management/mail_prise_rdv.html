@@ -4,8 +4,8 @@
     </head>
     <body>
         <p>Bonjour,</p>
-        <p>Vous avez réservé des documents à la bibliothèque {{ pickup_loc.name }} sans prendre un rendez-vous. Cet étape est nécessaire pour procéder au retrait de vos documents.</p>
-        <p>Merci <a href="https://babordplus.hosted.exlibrisgroup.com/primo-explore/account?vid=33PUDB_{{ pickup_loc.institution }}_VU1&section=requests&lang=fr_FR">de vous rendre sur le panier dans votre compte lecteur sur Babord +</a> afin de choisir un créneau de retrait pour vos documents.</p>
+        <p>Vous avez réservé des documents à la bibliothèque {{ pickup_loc.name }} sans prendre un rendez-vous. Cette étape est nécessaire pour procéder au retrait de vos documents.</p>
+        <p>Merci <a href="{{ url_to_primo }}">de vous rendre sur le panier dans votre compte lecteur sur Babord +</a> afin de choisir un créneau de retrait pour vos documents.</p>
         <p>Bien cordialement,</p>
         <p>Pour l’équipe de la bibliothèque </p>
     </body>

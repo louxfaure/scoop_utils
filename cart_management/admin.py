@@ -41,7 +41,8 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Items)
 class ItemsAdmin(admin.ModelAdmin):
-    list_display = ('created','title', 'pickuplocation', 'person', 'appointment')
+    list_display = ('created','title', 'pickuplocation', 'person', 'appointment','status','relance_mail')
+    list_filter = ['pickuplocation','status', 'person','relance_mail']
     ordering = ('pickuplocation', 'person',)
     search_fields = ('created','title','item_barcode','person__last_name')
     readonly_fields = ('created','modified')
@@ -171,7 +172,6 @@ class AppointmentAdmin(admin.ModelAdmin):
         lecteur.save()
         resas = services_rdv.Resas(library,library.open_hour,library.close_hour, library.plot_number,library.handling_time,library.days_for_booking,admin=True)
         list_hours = resas.get_list_hours_for_public_view()
-        print(list_hours)
         context = dict(
             self.admin_site.each_context(request), # Include common variables for rendering the admin template.
             locals = locals()

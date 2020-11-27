@@ -173,6 +173,7 @@ class Items(models.Model):
     description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (système)",blank=True, null=True)
     manual_description = models.CharField(max_length=300,verbose_name=u"Description du fascicule (usager)",blank=True, null=True)
     status = models.CharField(max_length=80,verbose_name=u"Statut de la réservation",blank=True, null=True)
+    relance_mail = models.IntegerField(verbose_name=u"Nombre de relances envoyées au lecteur pour l'inviter à prendre rendez-vous",default=0)
     person = models.ForeignKey(
         Person,
         verbose_name=u"Demandeur",
