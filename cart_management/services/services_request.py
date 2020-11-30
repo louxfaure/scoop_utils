@@ -265,7 +265,7 @@ def update_user_request(appointment,user_requests_list,institution):
         statut, reponse = api.update_user_request(id_lecteur,id_resa,json.dumps(alma_user_request),accept='json',content_type='json')
         cart_user_request.appointment = appointment
         cart_user_request.save()
-    return statut 
+    return "Success" 
 
 def get_request_user_status(user_id,user_request_id,institution):
     """TO DO
