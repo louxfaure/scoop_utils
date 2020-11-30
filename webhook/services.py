@@ -47,7 +47,7 @@ def event_dispatcher(event,api_key,request_data):
     """
     # TO DO FILTRER SUR LA PICKUPLOC + Place in QUEUE
     try:
-        pickup_loc = PickupLocation.objects.get(id_alma=request_data["pickup_location_library"])
+        pickup_loc = PickupLocation.objects.get(id_alma=request_data["user_request"]["pickup_location_library"])
     except PickupLocation.DoesNotExist:
             return "Le clique et colete n'est pas géré pour cette bibliothèque", 418
     if event == "REQUEST_CREATED" :
