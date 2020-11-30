@@ -153,7 +153,7 @@ class Appointment(models.Model):
         if self.is_peb :
             return "PEB"
         else :
-        return "{}/{}".format(Items.objects.filter(appointment=self,status='ON_LOAD').count(), Items.objects.filter(appointment=self).count())
+            return "{}/{}".format(Items.objects.filter(appointment=self,status='ON_LOAD').count(), Items.objects.filter(appointment=self).count())
     get_on_load_count.short_description = u'Documents sur le compte du lecteur'
 
     # def get_number_of_canceled_items(self):

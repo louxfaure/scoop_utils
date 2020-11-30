@@ -41,6 +41,8 @@ class Command(BaseCommand):
                     fail_silently=False,
                     html_message=html_message,
                 )
+        # Suppression des rdv sans résas
+        # for rdv_ss_resa in Appointment.objects.filter(appointment__isnull=True, relance_mail=0).annotate(max_date=Max('created')):
         #     for lect in Items.objects.values('person').filter(appointment__isnull=True, pickuplocation=bib['pickuplocation']).distinct():
         #         print(lect)
         #         resas_ss_rdv = Items.objects.filter(appointment__isnull=True, pickuplocation=bib['pickuplocation'], person=lect['person']).aggregate(Max('created'))
