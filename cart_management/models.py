@@ -156,7 +156,7 @@ class Appointment(models.Model):
             return "{}/{}".format(Items.objects.filter(appointment=self,status='ON_LOAD').count(), Items.objects.filter(appointment=self).count())
     get_on_load_count.short_description = u'Documents sur le compte du lecteur'
 
-    # def get_number_of_canceled_items(self):
+    # d  ef get_number_of_canceled_items(self):
     #     return Items.objects.filter(appointment=self).filter(get_item_status='IN_PROCESS').count()
     # get_number_of_canceled_items.short_description = u'Nombre de documennts annulés'
 
