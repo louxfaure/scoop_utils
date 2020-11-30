@@ -74,7 +74,6 @@ def get_holding_info(holdings_list,library):
     holding_info['call_number'] = "None"
     holding_info['location'] = "None"
     holding_info['library_id'] = "None"
-    retu 
     return holding_info
 
         
