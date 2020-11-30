@@ -46,6 +46,10 @@ def event_dispatcher(event,api_key,request_data):
         request_data (dict): Corps de la reservation json converti en dict
     """
     # TO DO FILTRER SUR LA PICKUPLOC + Place in QUEUE
+    try:
+        pickup_loc = PickupLocation.objects.get(id_alma=request_data["pickup_location_library"])
+    except PickupLocation.DoesNotExist:
+            return "Le clique et colete n'est pas géré pour cette bibliothèque", 418
     if event == "REQUEST_CREATED" :
         alma_inst = request_data["institution"]["value"]
         inst = alma_inst.replace("33PUDB_","")
