@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         now = datetime.today()
         # print(Items.objects.values('pickuplocation','person' ).filter(appointment__isnull=True).annotate(max_date=Max('created')))       
-        for resas_ss_rdv in Items.objects.values('pickuplocation','person' ).filter(appointment__isnull=True, relance_mail=1).annotate(max_date=Max('created')):
+        for resas_ss_rdv in Items.objects.values('pickuplocation','person' ).filter(appointment__isnull=True, relance_mail=0).annotate(max_date=Max('created')):
             print(resas_ss_rdv)
             time_delta = resas_ss_rdv['max_date'] - now
             delta_in_seconds = time_delta.seconds
