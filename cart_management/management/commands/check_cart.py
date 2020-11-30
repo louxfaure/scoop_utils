@@ -24,23 +24,23 @@ class Command(BaseCommand):
             # print(delta_in_minutes)
             if delta_in_minutes > 60 :
                 # print("on va faire le job !")
-            pickup_loc = PickupLocation.objects.get(id_alma=resas_ss_rdv['pickuplocation'])
-            lecteur = Person.objects.get(id_alma=resas_ss_rdv['person'])
-            url_to_primo = "https://babordplus.hosted.exlibrisgroup.com/primo-explore/account?vid=33PUDB_{}_VU1&section=requests&lang=fr_FR".format(pickup_loc.institution)
-            html_message = loader.render_to_string("cart_management/mail_prise_rdv.html", locals())
-            for resas_lecteurs in Items.objects.filter(appointment__isnull=True,pickuplocation=pickup_loc,person=lecteur):
-                resas_lecteurs.relance_mail =+ 1
-                resas_lecteurs.save()
-                print(resas_lecteurs.user_request_id)
+                pickup_loc = PickupLocation.objects.get(id_alma=resas_ss_rdv['pickuplocation'])
+                lecteur = Person.objects.get(id_alma=resas_ss_rdv['person'])
+                url_to_primo = "https://babordplus.hosted.exlibrisgroup.com/primo-explore/account?vid=33PUDB_{}_VU1&section=requests&lang=fr_FR".format(pickup_loc.institution)
+                html_message = loader.render_to_string("cart_management/mail_prise_rdv.html", locals())
+                for resas_lecteurs in Items.objects.filter(appointment__isnull=True,pickuplocation=pickup_loc,person=lecteur):
+                    resas_lecteurs.relance_mail =+ 1
+                    resas_lecteurs.save()
+                    print(resas_lecteurs.user_request_id)
 
-            send_mail(
-                "{} : Vous devez choisir un créneau de retrait afin de valider votre réservation".format(pickup_loc.name),
-                "Ce message contient en pièce jointe un message de votre bibliothèque.",
-                pickup_loc.from_email,
-                [lecteur.email],
-                fail_silently=False,
-                html_message=html_message,
-            )
+                send_mail(
+                    "{} : Vous devez choisir un créneau de retrait afin de valider votre réservation".format(pickup_loc.name),
+                    "Ce message contient en pièce jointe un message de votre bibliothèque.",
+                    pickup_loc.from_email,
+                    [lecteur.email],
+                    fail_silently=False,
+                    html_message=html_message,
+                )
         #     for lect in Items.objects.values('person').filter(appointment__isnull=True, pickuplocation=bib['pickuplocation']).distinct():
         #         print(lect)
         #         resas_ss_rdv = Items.objects.filter(appointment__isnull=True, pickuplocation=bib['pickuplocation'], person=lect['person']).aggregate(Max('created'))
