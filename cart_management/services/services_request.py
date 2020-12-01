@@ -42,7 +42,6 @@ def get_user_info(user_id,institution):
             u.save()
             return False, u
         else :
-            logger.error(user)
             return True,user
 
 def get_holding_info(holdings_list,library):
@@ -162,7 +161,6 @@ def get_user_carts(user):
                         except PickupLocation.DoesNotExist:
                             pickuplocation = 'none'
         elif status == "Error":
-            logger.error(user_request)
             return True,user_requests
     return False,user_carts_list       
 
@@ -197,7 +195,6 @@ def get_user_carts_admin(user,institution,library):
                         user_carts_list[library]["item_from_other_library"] = True                 
                     user_carts_list[library]["user_request_list"].append(user_request_item)
     elif status == "Error":
-        logger.error(user_request)
         return True,user_requests
     return False,user_carts_list       
 
@@ -235,7 +232,6 @@ def refresh_user_request(user,pickup_location):
             user_request_to_delete=Items.objects.get(user_request_id = cart_user_request )
             user_request_to_delete.delete()
     else:
-        logger.error(alma_user_request)
         return True,user_requests
     cart_user_requests_list =  Items.objects.filter(pickuplocation=pickup_location.id_alma).filter(person=user.id_alma).filter(appointment__isnull=True).order_by('library_name', 'location')
     return False,cart_user_requests_list
@@ -256,8 +252,8 @@ def update_user_request(appointment,user_requests_list,institution):
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     for cart_user_request in user_requests_list:
         id_lecteur = cart_user_request.person
+        # print("id lecteur : {}".format(id_lecteur))
         id_resa = cart_user_request.user_request_id
-        # logger.error(id_resa)
         statut, alma_user_request = api.get_user_request(id_lecteur,id_resa,accept='json')
         # print("{} -- {}".format(statut,json.dumps(alma_user_request, indent=2)))    
         alma_user_request["last_interest_date"] = appointment.get_date_formatee('alma')

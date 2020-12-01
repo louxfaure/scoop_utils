@@ -135,18 +135,18 @@ class AlmaUsers(object):
         except requests.exceptions.HTTPError:
             #print(response.text)
             error_code, error_message= self.get_error_message(response,accept)
-            self.logger.error("Alma_Apis :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
+            self.logger.warning("Alma_Apis :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
             if error_code in ['401890','401861'] :
                 return 'No record found', "{} -- {}".format(error_code, error_message)
             else : 
                 return 'Error', "{} -- {}".format(error_code, error_message)
         except requests.exceptions.ConnectionError:
             error_code, error_message= self.get_error_message(response,accept)
-            self.logger.error("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
+            self.logger.warning("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
             return 'Error', "{} -- {}".format(error_code, error_message)
         except requests.exceptions.RequestException:
             error_code, error_message= self.get_error_message(response,accept)
-            self.logger.error("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
+            self.logger.warning("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
             return 'Error', "{} -- {}".format(error_code, error_message)
         return "Success", response
 

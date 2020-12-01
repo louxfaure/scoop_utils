@@ -117,15 +117,15 @@ class AlmaRecords(object):
             response.raise_for_status()  
         except requests.exceptions.HTTPError:
             error_code, error_message= self.get_error_message(response,accept)
-            self.logger.error("Alma_Apis :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
+            self.logger.warning("Alma_Apis :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
             return 'Error', "{} -- {}".format(error_code, error_message)
         except requests.exceptions.ConnectionError:
             error_code, error_message= self.get_error_message(response,accept)
-            self.logger.error("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
+            self.logger.warning("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
             return 'Error', "{} -- {}".format(error_code, error_message)
         except requests.exceptions.RequestException:
             error_code, error_message= self.get_error_message(response,accept)
-            self.logger.error("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
+            self.logger.warning("Alma_Apis :: Connection Error: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))
             return 'Error', "{} -- {}".format(error_code, error_message)
         return "Success", response
 
