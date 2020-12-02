@@ -57,7 +57,7 @@ def get_holding_info(holdings_list,library):
     holding_info = {}
     for holding in holdings_list:
         if holding['library']['desc'] == library :
-                holding_info['call_number'] = holding['call_number']
+                holding_info['call_number'] = holding['call_number'] if 'call_number' in holding.keys() else "None"
                 holding_info['location'] = holding['location']['desc']
                 holding_info['library_id'] = holding['library']['value']
                 holding_info['library_name'] = holding['library']['desc']
@@ -65,7 +65,7 @@ def get_holding_info(holdings_list,library):
     if library in ['Bib. pluridisciplinaire','Spot Pessac','BU Sciences et techniques'] :
         for holding in holdings_list:
             if holding['library']['desc'] == "BU droit, science politique, économie" :
-                    holding_info['call_number'] = holding['call_number']
+                    holding_info['call_number'] = holding['call_number'] if 'call_number' in holding.keys() else "None"
                     holding_info['location'] = holding['location']['desc']
                     holding_info['library_id'] = holding['library']['value']
                     holding_info['library_name'] = holding['library']['desc']
