@@ -70,10 +70,17 @@ def event_dispatcher(event,api_key,request_data):
         try:
             user_request_item = Items.objects.get(user_request_id=request_data["user_request"]["request_id"])
         except Items.DoesNotExist:
-            return "La réservation n'existe pas. Impossible de modifier le tatut", 500    
+            alma_inst = request_data["institution"]["value"]
+            inst = alma_inst.replace("33PUDB_","")
+            user_id = request_data["user_request"]["user_primary_id"]
+            error, user = services_request.get_user_info(user_id,inst)
+            if error :
+                return "Utilisateur inconnu", 418
+            services_request.get_user_request_item(request_data["user_request"],api_key,user)
+            return "La réservation n'existe pas. Reservation créée avec succés", 200
         user_request_item.status = request_data["user_request"]["request_status"]
         user_request_item.save()
-        return "Statut de la reservation supprimée avec succés", 200
+        return "Statut de la reservation modifié avec succés", 200
     if event == "REQUEST_CLOSED" :
         try:
             user_request_item = Items.objects.get(user_request_id=request_data["user_request"]["request_id"])
