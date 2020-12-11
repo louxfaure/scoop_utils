@@ -73,6 +73,7 @@ def get_holding_info(holdings_list,library):
     holding_info['call_number'] = "None"
     holding_info['location'] = "None"
     holding_info['library_id'] = "None"
+    holding_info['library_name'] = "None"
     return holding_info
 
         
@@ -95,7 +96,7 @@ def get_user_request_item(user_request,api_key,user):
                                     library_id = None,
                                     location = None,
                                     call_number = None,
-                                    title = user_request['title'],
+                                    title = user_request['title'][0:450],
                                     item_barcode = user_request['barcode'],
                                     description = user_request['description'] if 'description' in user_request else None,
                                     manual_description = user_request['manual_description'] if 'manual_description' in user_request else None,
