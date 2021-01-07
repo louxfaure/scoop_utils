@@ -6,3 +6,5 @@ wsgi.py
 *.sqlite3
 db.json
 migrations/
+cart_management/migrations/
+cart_management/migrations/0001_initial.py

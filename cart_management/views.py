@@ -124,7 +124,7 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
         "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
         pickup_loc.from_email,
         [pickup_loc.email],
-        fail_silently=False,
+        fail_silently=True,
         html_message=html_message,
     )
     #3 - On envoi un mail à l'usager
@@ -134,7 +134,7 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
         plain_message,
         pickup_loc.from_email,
         [user.email],
-        fail_silently=False,
+        fail_silently=True,
     )
     #5 - On regarde s'il reste des paniers à valider
     institution_id = request.session.get('institution_id')
