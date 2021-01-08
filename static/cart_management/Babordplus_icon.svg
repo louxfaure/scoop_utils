@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 272 340" style="enable-background:new 0 0 272 340;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#CECD00;}
+	.st2{font-family:'SourceSansPro-Semibold';}
+	.st3{font-size:18px;}
+</style>
+<rect x="120.5" y="145.5" class="st0" width="32" height="32"/>
+<g>
+	<path d="M123.41,153.63h4.68c3.19,0,5.42,1.08,5.42,3.84c0,1.56-0.84,2.95-2.3,3.43v0.1c1.87,0.36,3.19,1.61,3.19,3.77
+		c0,3.1-2.45,4.61-5.95,4.61h-5.04V153.63z M127.75,160.33c2.66,0,3.77-0.98,3.77-2.59c0-1.82-1.25-2.5-3.7-2.5h-2.4v5.09H127.75z
+		 M128.16,167.77c2.69,0,4.25-0.96,4.25-3.07c0-1.94-1.51-2.83-4.25-2.83h-2.74v5.9H128.16z"/>
+</g>
+<g>
+	<circle class="st1" cx="143" cy="162" r="7.8"/>
+	<text transform="matrix(1 0 0 1 138.4253 167.9253)" class="st0 st2 st3">+</text>
+</g>
+</svg>
