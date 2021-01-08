@@ -32,6 +32,8 @@ def cart_homepage(request):
     """
     user_id = request.session.get('user_id')
     institution_id = request.session.get('institution_id')
+    if user_id in [None, ''] or institution_id in [None, ''] :
+        return render(request, "cart_management/panier_vide.html", locals())
     # On récupère les infos du lecteur
     error, user = services_request.get_user_info(user_id,institution_id)
     if error :
@@ -88,16 +90,16 @@ def request_delation(request, request_id, institution, pickup_loc_id):
 
 def rdv(request, pickup_loc_id, user_id, date_rdv):
     date_rdv_in_date = datetime.strptime(date_rdv, '%Y-%m-%d %H:%M:%S')
-    # date_rdv_in_date = date_rdv
     pickup_loc = PickupLocation.objects.get(id_alma=pickup_loc_id)
+
     error, user = services_request.get_user_info(user_id,pickup_loc.institution)
     if error :
-        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
+        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return redirect('cart-validation', pickup_loc_id=pickup_loc_id)
     ##On raffraichi et récupère la liste des résa du lecteur pour la bib
     error,title_list = services_request.refresh_user_request(user,pickup_loc)
     if error :
-        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
+        messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return redirect('cart-validation', pickup_loc_id=pickup_loc_id)
     # On créé un rdv pour l'usager
     appointment = Appointment(date=date_rdv, person=user, library=pickup_loc)
@@ -140,3 +142,13 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
     institution_id = request.session.get('institution_id')
     other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
     return render(request, "cart_management/confirmation_page.html", locals())
+
+def mail(request):
+    send_mail(
+        "Test send mail",
+        "ça marche",
+        "alexandre.faure@u-bordeaux.fr",
+        ["alexandre.faure@u-bordeaux.fr"],
+        fail_silently=False,
+    )
+    return render(request, "cart_management/mail.html", locals())
