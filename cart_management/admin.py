@@ -14,7 +14,13 @@ from django.template.response import TemplateResponse
 from .services import services_request, services_rdv
 from .forms import AddRdvForm
 from datetime import datetime, time
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
+import logging
+import threading
+# import os
+
+#Initialisation des logs
+logger = logging.getLogger(__name__)
 
 # from security.models import Security
 
@@ -24,6 +30,42 @@ admin.site.index_title = "Gestion du Clic et Collecte"
 
 admin.site.register(DaysOfWeek)
 admin.site.register(ClosedDays)
+
+#Thread pour l'ajout de la date et l'heure de rdv dans Alma
+class UpdateUserRequestThread(threading.Thread):
+
+    def __init__(self,appointment,title_list,institution):
+        self.appointment = appointment
+        self.title_list = title_list
+        self.institution = institution
+        threading.Thread.__init__(self)
+
+    def run(self):
+        logger.info("starting UpdateUserRequestThread")
+        try : 
+            services_request.update_user_request(self.appointment,self.title_list,self.institution)
+        except Exception as e:
+            logger.error("ERROR UpdateUserRequestThread :: {}".format(e))
+
+        logger.info("Ending UpdateUserRequestThread")
+
+
+#Tread pour l'envoi du mail récapitulatif à l'usager
+class EmailThread(threading.Thread):
+
+    def __init__(self,email,mail_type):
+        self.email = email
+        self.mail_type = mail_type
+        threading.Thread.__init__(self)
+
+    def run(self):
+        logger.info("starting EmailThread : {}".format(self.mail_type))
+        try :
+            self.email.send(fail_silently=False)
+        except Exception as e:
+            logger.error("ERROR EmailThread {} :: {}".format(self.mail_type,e))
+        logger.info("Ending EmailThread : {}".format(self.mail_type))
+
 
 
 class AppointmentInline(admin.TabularInline):
@@ -226,30 +268,29 @@ class AppointmentAdmin(admin.ModelAdmin):
             messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
             return HttpResponseRedirect('/admin/cart_management/appointment/confirm/{}/{}'.format(pickup_loc_id,user_id)) 
         #1 - On va marquer dans Alma les résas comme traité en ajoutant une note et une date de fin d'intéret + on attache notre rdv à la résa
-        services_request.update_user_request(appointment,title_list,pickup_loc.institution)
+        UpdateUserRequestThread(appointment,title_list,pickup_loc.institution).start()
         #2 - On envoi un mail à l'opérateur de commande 
         html_message = loader.render_to_string("cart_management/admin_mail_message.html", locals())
-        send_mail(
+        library_email = EmailMultiAlternatives(
             "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
             "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
             pickup_loc.from_email,
             [pickup_loc.email],
-            fail_silently=False,
-            html_message=html_message,
+            # fail_silently=True,
+            # html_message=html_message,
         )
+        library_email.attach_alternative(html_message, "text/html")
+        html_message.content_subtype = "html"
+        EmailThread(library_email,"library_email").start()
         #3 - On envoi un mail à l'usager
         plain_message = loader.render_to_string("cart_management/user_mail_message.txt", locals())
-        send_mail(
-            "{} : Votre demande de Clique et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+        user_email = EmailMessage(
+            "{} : Votre demande de Clic et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
             plain_message,
             pickup_loc.from_email,
             [user.email],
-            fail_silently=False,
         )
-        context = dict(
-            self.admin_site.each_context(request), # Include common variables for rendering the admin template.
-            locals = locals()
-        )
+        EmailThread(user_email,"user_email").start()
         messages.success(request, 'Le rendez-vous a été créé avec succès.')
         return HttpResponseRedirect("/admin/cart_management/appointment/?library__id_alma__exact={}".format(pickup_loc_id))
 
@@ -279,13 +320,17 @@ class AppointmentAdmin(admin.ModelAdmin):
         # for title in title_list 
         #2 - On envoi un mail à l'usager
         plain_message = loader.render_to_string("cart_management/user_mail_message_peb.txt", locals())
-        send_mail(
-            "{} : Votre rendez-vous pour le Prêt entre Bibliothèques est validé pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
-            plain_message,
-            pickup_loc.from_email,
-            [user.email],
-            fail_silently=False,
-        )
+        try :
+            send_mail(
+                "{} : Votre rendez-vous pour le Prêt entre Bibliothèques est validé pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+                plain_message,
+                pickup_loc.from_email,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error('Erreur mail PEB : {}'.format(e))
+            messages.error(request, "Un problème est survenu ! Le rendez-vous est bien enregistré mais le mail n'a pas été envoyé à l'usager.")
         context = dict(
             self.admin_site.each_context(request), # Include common variables for rendering the admin template.
             locals = locals()

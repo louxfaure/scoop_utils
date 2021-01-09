@@ -87,7 +87,7 @@ def get_user_request_item(user_request,api_key,user):
         api_key {str} -- [description]
     """
     record_api = Alma_Apis_Records.AlmaRecords(api_key, region='EU', service='pickup_collect')
-    logger.info(user_request)
+    # logger.info(user_request)
     try:
         user_request_item = Items.objects.get(user_request_id=user_request['request_id'])
     except Items.DoesNotExist:
@@ -141,7 +141,7 @@ def get_user_carts(user):
         api_key = settings.ALMA_API_KEY[institution]
         api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
         status, user_requests = api.get_user_requests(user.id_alma,'HOLD',limit = 50,accept='json')
-        logger.info("{} --> {} : {}".format(institution,status,user_requests))
+        # logger.info("{} --> {} : {}".format(institution,status,user_requests))
         if status == "Success":
             # print("{} --> {} : {}".format(institution,status,requests['total_record_count']))
             if  user_requests['total_record_count'] > 0:
@@ -179,7 +179,7 @@ def get_user_carts_admin(user,institution,library):
     api_key = settings.ALMA_API_KEY[institution]
     api = Alma_Apis_Users.AlmaUsers(apikey=api_key, region='EU', service='test')
     status, user_requests = api.get_user_requests(user.id_alma,'HOLD',limit = 50,accept='json')
-    logger.info("{} --> {} : {}".format(institution,status,user_requests))
+    # logger.info("{} --> {} : {}".format(institution,status,user_requests))
     if status == "Success":
         # print("{} --> {} : {}".format(institution,status,requests['total_record_count']))
         if  user_requests['total_record_count'] > 0:

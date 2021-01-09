@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.db import IntegrityError
 from django.db.models import Count
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
 
 from .services import services_request, services_rdv
 from .models import PickupLocation, Items, Appointment
@@ -15,10 +15,46 @@ from urllib.parse import urlencode
 import json
 import pytz
 import logging
+import threading
 # import os
 
 #Initialisation des logs
 logger = logging.getLogger(__name__)
+
+#Thread pour l'ajout de la date et l'heure de rdv dans Alma
+class UpdateUserRequestThread(threading.Thread):
+
+    def __init__(self,appointment,title_list,institution):
+        self.appointment = appointment
+        self.title_list = title_list
+        self.institution = institution
+        threading.Thread.__init__(self)
+
+    def run(self):
+        logger.info("starting UpdateUserRequestThread")
+        try : 
+            services_request.update_user_request(self.appointment,self.title_list,self.institution)
+        except Exception as e:
+            logger.error("ERROR UpdateUserRequestThread :: {}".format(e))
+
+        logger.info("Ending UpdateUserRequestThread")
+
+
+#Tread pour l'envoi du mail récapitulatif à l'usager
+class EmailThread(threading.Thread):
+
+    def __init__(self,email,mail_type):
+        self.email = email
+        self.mail_type = mail_type
+        threading.Thread.__init__(self)
+
+    def run(self):
+        logger.info("starting EmailThread : {}".format(self.mail_type))
+        try :
+            self.email.send(fail_silently=False)
+        except Exception as e:
+            logger.error("ERROR EmailThread {} :: {}".format(self.mail_type,e))
+        logger.info("Ending EmailThread : {}".format(self.mail_type))
 
 def index(request,user_id,institution_id):
     request.session['institution_id'] = institution_id[7:]
@@ -45,6 +81,9 @@ def cart_homepage(request):
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
         return render(request, "cart_management/error.html", locals())
     if not user_carts :
+        del request.session['user_id']
+        if ('cart_list' in request.session) :
+            del request.session['cart_list']
         return render(request, "cart_management/panier_vide.html", locals())
     user.save()
     request.session['cart_list'] = user_carts
@@ -56,9 +95,17 @@ def cart_homepage(request):
 def cart_validation(request, pickup_loc_id):
     user_id = request.session.get('user_id')
     cart_list = request.session.get('cart_list')
-    item_from_other_library = cart_list[pickup_loc_id]["item_from_other_library"]
-    pickup_loc = PickupLocation.objects.get(id_alma=pickup_loc_id)
+    institution_id = request.session.get('institution_id')
+    if user_id in [None, ''] or institution_id in [None, ''] or cart_list in [None, ''] :
+        return render(request, "cart_management/panier_vide.html", locals())
+    
     # Liste des réservations
+    # Au cas où un panier reste présent dans les variables de session et que l'id de la pickup location ne correspond pas 
+    try : 
+        item_from_other_library = cart_list[pickup_loc_id]["item_from_other_library"]        
+    except Exception as e:
+        return redirect('index', user_id=user_id, institution_id=institution_id)
+    pickup_loc = PickupLocation.objects.get(id_alma=pickup_loc_id)
     user_requests_list =  Items.objects.filter(pickuplocation=pickup_loc_id).filter(person=user_id).filter(appointment__isnull=True).order_by('library_name', 'location')
     # Proposition des RDV
     if item_from_other_library :
@@ -89,9 +136,9 @@ def request_delation(request, request_id, institution, pickup_loc_id):
     return redirect('cart-validation', pickup_loc_id=pickup_loc_id)
 
 def rdv(request, pickup_loc_id, user_id, date_rdv):
+    print("Debut traitement")
     date_rdv_in_date = datetime.strptime(date_rdv, '%Y-%m-%d %H:%M:%S')
     pickup_loc = PickupLocation.objects.get(id_alma=pickup_loc_id)
-
     error, user = services_request.get_user_info(user_id,pickup_loc.institution)
     if error :
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support.')
@@ -117,38 +164,55 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
         return redirect('cart-validation', pickup_loc_id=pickup_loc_id) 
     #1 - On va marquer dans Alma les résas comme traité en ajoutant une note et une date de fin d'intéret + on attache notre rdv à la résa
-    services_request.update_user_request(appointment,title_list,pickup_loc.institution)
-    # for title in title_list 
-    #2 - On envoi un mail à l'opérateur de commande 
-    html_message = loader.render_to_string("cart_management/admin_mail_message.html", locals())
-    send_mail(
-        "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
-        "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
-        pickup_loc.from_email,
-        [pickup_loc.email],
-        fail_silently=True,
-        html_message=html_message,
-    )
-    #3 - On envoi un mail à l'usager
+    UpdateUserRequestThread(appointment,title_list,pickup_loc.institution).start()
+    #2 - On envoi un mail à l'usager
     plain_message = loader.render_to_string("cart_management/user_mail_message.txt", locals())
-    send_mail(
+    user_email = EmailMessage(
         "{} : Votre demande de Clic et collecte est validée pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
         plain_message,
         pickup_loc.from_email,
         [user.email],
-        fail_silently=True,
     )
+    EmailThread(user_email,"user_email").start()
+    
+    #3 - On envoi un mail à l'opérateur de commande 
+    html_message = loader.render_to_string("cart_management/admin_mail_message.html", locals())
+    library_email = EmailMultiAlternatives(
+        "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+        "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
+        pickup_loc.from_email,
+        [pickup_loc.email],
+        # fail_silently=True,
+        # html_message=html_message,
+    )
+    library_email.attach_alternative(html_message, "text/html")
+    html_message.content_subtype = "html"
+    EmailThread(library_email,"library_email").start()
+    # try : send_mail(
+    #     "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
+    #     "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
+    #     pickup_loc.from_email,
+    #     [pickup_loc.email],
+    #     fail_silently=True,
+    #     html_message=html_message,
+    # )
+    # except Exception as e:
+    #     logger.error('Erreur Mail Biblio : {}'.format(e))
+    #         #5 - On regarde s'il reste des paniers à valider
+    #     institution_id = request.session.get('institution_id')
+    #     other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
+    #     return render(request, "cart_management/confirmation_page.html", locals())
     #5 - On regarde s'il reste des paniers à valider
     institution_id = request.session.get('institution_id')
     other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
     return render(request, "cart_management/confirmation_page.html", locals())
 
 def mail(request):
-    send_mail(
-        "Test send mail",
-        "ça marche",
-        "alexandre.faure@u-bordeaux.fr",
-        ["alexandre.faure@u-bordeaux.fr"],
-        fail_silently=False,
-    )
+    email = EmailMessage(
+        'Hello',
+        'Body goes here',
+        'alexandre.faure@u-bordeaux.fr',
+        ['alexandre.faure@u-bordeaux.fr'],
+        )
+    EmailThread(email,"test").start()
     return render(request, "cart_management/mail.html", locals())
