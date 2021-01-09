@@ -163,7 +163,12 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
         logger.error('Erreur : {}'.format(e))
         messages.error(request, 'Un problème est survenu merci de rééssayer ou de contacter le support. [A REPRENDRE]')
         return redirect('cart-validation', pickup_loc_id=pickup_loc_id) 
-    #1 - On va marquer dans Alma les résas comme traité en ajoutant une note et une date de fin d'intéret + on attache notre rdv à la résa
+    #1 On lie nos réservations au rendez-vous
+    # for cart_user_request in title_list :
+    #     cart_user_request.appointment = appointment
+    #     cart_user_request.save()
+    #1 - On va marquer dans Alma les résas comme traité en ajoutant une note et une date de fin d'intéret 
+
     UpdateUserRequestThread(appointment,title_list,pickup_loc.institution).start()
     #2 - On envoi un mail à l'usager
     plain_message = loader.render_to_string("cart_management/user_mail_message.txt", locals())
@@ -188,23 +193,9 @@ def rdv(request, pickup_loc_id, user_id, date_rdv):
     library_email.attach_alternative(html_message, "text/html")
     html_message.content_subtype = "html"
     EmailThread(library_email,"library_email").start()
-    # try : send_mail(
-    #     "{} : Nouvelle commande pour le {}".format(pickup_loc.name,appointment.get_date_formatee('complet')),
-    #     "Ce message contient en pièce jointe les informations de réservation d'un lecteur",
-    #     pickup_loc.from_email,
-    #     [pickup_loc.email],
-    #     fail_silently=True,
-    #     html_message=html_message,
-    # )
-    # except Exception as e:
-    #     logger.error('Erreur Mail Biblio : {}'.format(e))
-    #         #5 - On regarde s'il reste des paniers à valider
-    #     institution_id = request.session.get('institution_id')
-    #     other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
-    #     return render(request, "cart_management/confirmation_page.html", locals())
     #5 - On regarde s'il reste des paniers à valider
     institution_id = request.session.get('institution_id')
-    other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
+    other_cart_list = Items.objects.filter(person=user.id_alma).filter(appointment__isnull=True).exclude(library_id=pickup_loc_id).values('pickuplocation','pickuplocation__name').annotate(total=Count('user_request_id')).order_by('total')
     return render(request, "cart_management/confirmation_page.html", locals())
 
 def mail(request):
