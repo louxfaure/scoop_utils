@@ -107,10 +107,16 @@ def get_user_request_item(user_request,api_key,user):
         if user_request['barcode'] is not None:
             status,item = record_api.get_item_with_barcode(user_request['barcode'],accept='json')
             if status == "Success":
-                user_request_item.call_number = item['holding_data']['call_number']
-                user_request_item.location = item['item_data']['location']['desc']
-                user_request_item.library_id = item['item_data']['library']['value']
-                user_request_item.library_name = item['item_data']['library']['desc']
+                if item['holding_data']['in_temp_location'] == "true" :
+                    user_request_item.call_number = item['holding_data']['call_number']
+                    user_request_item.location = item['holding_data']['temp_location']['desc']
+                    user_request_item.library_id = item['holding_data']['temp_library']['value']
+                    user_request_item.library_name = item['holding_data']['temp_library']['desc']
+                else :
+                    user_request_item.call_number = item['holding_data']['call_number']
+                    user_request_item.location = item['item_data']['location']['desc']
+                    user_request_item.library_id = item['item_data']['library']['value']
+                    user_request_item.library_name = item['item_data']['library']['desc']
         # Cas d'une reservation qui a été placée sur l'exemplaire on va se baser sur les informatiosn de la holding
         else:
             #1- On va chercher la liste des holdinggs sous la notice biblio
@@ -156,7 +162,7 @@ def get_user_carts(user):
                                 user_carts_list[pickup_location_library]["item_from_other_library"] = False
                                 user_carts_list[pickup_location_library]["name"] = user_request['pickup_location']
                             user_request_item = get_user_request_item(user_request,api_key,user)
-                            if user_request_item.library_id != pickup_location_library :
+                            if user_request['managed_by_library_code'] != pickup_location_library :
                                 user_carts_list[pickup_location_library]["item_from_other_library"] = True                 
                             user_carts_list[pickup_location_library]["user_request_list"].append(user_request_item.user_request_id)
                         except PickupLocation.DoesNotExist:
