@@ -6,7 +6,6 @@ from .services import *
 from cart_management.services import services_request, services_rdv
 
 import json
-
 @csrf_exempt
 def webhook(request):
     print("Whouau !!!!")
