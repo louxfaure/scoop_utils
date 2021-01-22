@@ -263,7 +263,7 @@ def update_user_request(appointment,user_requests_list,institution):
         id_resa = cart_user_request.user_request_id
         statut, alma_user_request = api.get_user_request(id_lecteur,id_resa,accept='json')
         # print("{} -- {}".format(statut,json.dumps(alma_user_request, indent=2)))    
-        alma_user_request["last_interest_date"] = appointment.get_date_formatee('alma')
+        # alma_user_request["last_interest_date"] = appointment.get_date_formatee('alma')
         alma_user_request["comment"] = "Retrait du document prévu le {}".format(appointment.get_date_formatee('complet'))
         statut, reponse = api.update_user_request(id_lecteur,id_resa,json.dumps(alma_user_request),accept='json',content_type='json')
         cart_user_request.appointment = appointment
