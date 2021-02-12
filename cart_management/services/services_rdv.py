@@ -28,7 +28,7 @@ class Resas(object):
         while x <= days_for_booking: 
         # for i in range(days_for_booking): 
             # Un jour est ouvré s'il n'est ni férié, ni samedi, ni dimanche
-            if not self.is_holiday(date_from) and date_from.isoweekday() not in [6, 7] and date_from.isoweekday() in self.opening_days and date_from.date() not in self.closed_days:  
+            if not self.is_holiday(date_from) and date_from.isoweekday() in self.opening_days and date_from.date() not in self.closed_days:  
                 # my_object = {date_from : my_hours}
                 self.list_days.append(date_from)
                 x +=1
