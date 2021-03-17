@@ -1,7 +1,7 @@
-"""pickup_collect URL Configuration
+"""outils_biblio URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.0/topics/http/urls/
+    https://docs.djangoproject.com/en/3.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -14,14 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include,path
-
+from django.urls import path, re_path, include
+from . import views
 
 urlpatterns = [
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('login/', include('django.contrib.auth.urls')),
-    path('panier/', include('cart_management.urls')),
-    path('webhook/', include('webhook.urls')),
-    path('sudoc/', include('sudoc.urls')),
-    path('admin/', admin.site.urls),
+    path('', views.home, name='home'),
+    path('ok', views.success, name='success'),
 ]

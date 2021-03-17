@@ -65,7 +65,6 @@
       {% if not is_popup %}
         {% if is_displaying_menu %}
           {% block sidebar_menu %}
-
             <div id="sidebar-menu" class="col-xs-4 col-sm-3 col-md-2 sidebar-menu">
               {% block branding %}
                 <a href="{% url 'admin:index' %}" class="django-admin-logo">
@@ -76,6 +75,7 @@
               {% block filters %}{% endblock filters %}
 
               {% if available_apps %}
+                {% if request.user|has_group:"Opérateur des réservations" or user.is_superuser %}
                {% get_library_list as all_library_list %}
                <ul class="nav nav-sidebar">
                     <li>
@@ -116,7 +116,14 @@
                         </a>
                     </li>
                 </ul>
-                
+              {% endif %}
+              {% if request.user|has_group:"SUDOC" or user.is_superuser %}
+              <ul class="nav nav-sidebar-other">
+                <li><a class="section" href="{% url 'admin:sudoc_process_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter une Analyse</a></li>
+                <li><a class="section" href="{% url 'admin:sudoc_error_changelist' %}" title=""><span class="glyphicon glyphicon-alert"></span>Consulter les anomalies</a></li>
+                <li><a class="section" href="{% url 'admin:sudoc_library_changelist' %}" title=""><span class="glyphicon glyphicon-education"></span>Déclarer les localisations et RCR du réseau</a></li>
+              </ul>
+              {% endif %}
             {% else %}
               <p class="permission-warning">{% trans "You don't have permission to view or edit anything." %}</p>
             {% endif %}

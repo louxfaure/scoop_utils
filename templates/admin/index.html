@@ -13,6 +13,7 @@
 <div id="content-main">
   {% if app_list %}
   <div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto">
+  {% if request.user|has_group:"Opérateur des réservations"%}
     <h2 class="display-4">Liste des rendez-vous par bibliothèque de retrait des documents</h2>
       <div class="list-group">
       {% if not user.staff.library %}
@@ -32,6 +33,16 @@
             <a class="list-group-item list-group-item-action" href="{% url 'admin:cart_management_person_changelist' %}" title=""><span class="glyphicon glyphicon-user"></span> Rechercher un lecteur</a>
             <a class="list-group-item list-group-item-action" href="{% url 'admin:cart_management_items_changelist' %}" title=""><span class="glyphicon glyphicon-book"></span> Rechercher une réservation</a>
       </div>
+  {% endif %}
+  {% if request.user|has_group:"SUDOC"%}
+    <h2 class="display-4">AAnalyses de recouvrements SUDOC </h2>
+      <div class="list-group">
+          <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_process_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter une Analyse</a>
+          <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_error_changelist' %}" title=""><span class="glyphicon glyphicon-alert"></span>Consulter les anomalies</a>
+          <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_library_changelist' %}" title=""><span class="glyphicon glyphicon-education"></span>Déclarer les localisations et RCR du réseau</a>
+
+    </div>
+{% endif %}
   {# block superadmin#}
   {% if user.is_superuser %}
     <h2 class="display-4">Accès administrateur</h2>

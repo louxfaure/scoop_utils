@@ -2,3 +2,8 @@ body { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAA
 .error-template {padding: 40px 15px;text-align: center;}
 .error-actions {margin-top:15px;margin-bottom:15px;}
 .error-actions .btn { margin-right:10px; }
+
+#user-tools .glyphicon {
+    margin-top: 4px;
+    margin-right: 4px;
+  }

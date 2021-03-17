@@ -42,3 +42,12 @@ def get_url_booking_not_done(library_id):
     now= datetime.today()
     library_url = "{}?library__id_alma__exact={}&date__lt={}".format(url,library_id,now.strftime("%Y-%m-%d"))
     return library_url
+
+
+@register.filter('has_group')
+def has_group(user, group_name):
+    """
+    Verifica se este usuário pertence a um grupo
+    """
+    groups = user.groups.all().values_list('name', flat=True)
+    return True if group_name in groups else False

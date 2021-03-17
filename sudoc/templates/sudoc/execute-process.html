@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+{% load bootstrap4 %}
+<form action="" method="post" class="form" enctype="multipart/form-data">
+    {% csrf_token %}
+ {% bootstrap_form form %}
+    {% buttons %}
+        <button type="submit" class="btn btn-primary">Envoyer</button>
+    {% endbuttons %}   
+    </div>
+    </form>
+{% endblock %}

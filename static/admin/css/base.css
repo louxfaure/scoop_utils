@@ -271,6 +271,7 @@ select {
 }
 #user-tools .glyphicon {
   margin-top: 4px;
+  margin-right: 4px;
 }
 #user-tools .dropdown-menu {
   border-color: #adadad;
