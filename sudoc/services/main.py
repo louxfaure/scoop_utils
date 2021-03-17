@@ -30,7 +30,8 @@ def handle_uploaded_file(f,process):
         num_line = 0
         for line in f :
             line = line.rstrip()
-            if (clean_ppn = re.search("(^|\(PPN\))([0-9]{8}[0-9Xx]{1})(;|$)", line.decode())) is None :
+            clean_ppn = re.search("(^|\(PPN\))([0-9]{8}[0-9Xx]{1})(;|$)", line.decode())
+            if clean_ppn  is None :
                 error = Error(  error_ppn = line.decode(),
                                 error_type = 'PPN_MAL_FORMATE',
                                 error_process = process)
