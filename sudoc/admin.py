@@ -69,27 +69,31 @@ class ExportMixin:
 
 
 @admin.register(Library)
-class LibraryAdmin(admin.ModelAdmin):
+class LibraryAdmin(admin.ModelAdmin,ExportMixin):
     list_display = ('library_id', 'library_rcr', 'library_name', 'institution')
     ordering = ('library_name', 'institution')
     search_fields = ('library_id', 'library_rcr', 'library_name')
+    actions = ["export_as_csv"]
 
 @admin.register(Process)
 class ProcessAdmin(admin.ModelAdmin):
-    list_display = ('process_library', 
+    list_display = ('process_library',
                     'process_job_type',
                     'process_is_done', 
                     'process_start_date',
                     'process_end_date',
                     'process_num_title_to_processed', 
                     'process_num_title_processed',
-                    'process_num_ppn_mal_formate',
-                    'process_num_ppn_inconnus_alma',
-                    'process_num_loc_inconnues_alma',
-                    'process_num_ppn_inconnus_sudoc',
-                    'process_num_loc_inconnues_sudoc')
+                    'link_process_num_ppn_mal_formate',
+                    'link_process_num_ppn_inconnus_alma',
+                    'link_process_num_loc_inconnues_alma',
+                    'link_process_num_ppn_inconnus_sudoc',
+                    'link_process_num_loc_inconnues_sudoc')
     ordering = ('process_start_date', 'process_library')
-    search_fields = ('process_library', 'process_job_type', 'process_start_date','process_is_done')
+    list_filter = ['process_library','process_job_type', 'process_start_date']
+    search_fields = ('process_library', 'process_job_type', 'process_start_date','process_is_done','id')
+
+
     
     def get_urls(self):
 
@@ -132,6 +136,6 @@ class ProcessAdmin(admin.ModelAdmin):
 class ErrorAdmin(admin.ModelAdmin, ExportMixin):
     list_display = ('error_ppn', 'error_type', 'error_process')
     ordering = ('error_process','error_type')
-    list_filter = ['error_type','error_process__process_library']
+    list_filter = ['error_process__process_library','error_type','error_process__process_job_type']
     search_fields = ('error_ppn', 'error_type', 'error_process')
-    actions = ["export_as_csv","export_as_set"]
+    actions = ["export_as_csv"]

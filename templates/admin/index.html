@@ -35,7 +35,7 @@
       </div>
   {% endif %}
   {% if request.user|has_group:"SUDOC"%}
-    <h2 class="display-4">AAnalyses de recouvrements SUDOC </h2>
+    <h2 class="display-4">Analyses de recouvrements SUDOC </h2>
       <div class="list-group">
           <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_process_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter une Analyse</a>
           <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_error_changelist' %}" title=""><span class="glyphicon glyphicon-alert"></span>Consulter les anomalies</a>
