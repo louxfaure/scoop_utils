@@ -44,14 +44,14 @@ class Process(models.Model):
     process_end_date = models.DateTimeField(auto_now_add=False, verbose_name=u"Date et heure de fin du traitement", null=True)
     process_job_type = models.CharField(max_length=13,verbose_name=u"Analyse de recouvrement",choices=JOB_TYPE_CHOICES,default=ALMA_TO_SUDOC)
     process_is_done = models.BooleanField(default=False,verbose_name=u"Traitement terminé ?")
-    process_num_title_to_processed = models.SmallIntegerField(verbose_name=u"Nombre de titres à traiter")
-    process_num_title_processed = models.SmallIntegerField(verbose_name=u"Nombre de titres traités", default=0)
-    process_num_ppn_mal_formate = models.SmallIntegerField(verbose_name=u"Nombre de PPN erronnés", default=0)
-    process_num_ppn_inconnus_alma = models.SmallIntegerField(verbose_name=u"Nombre de PPN inconnus dans Alma", default=0)
-    process_num_loc_inconnues_alma = models.SmallIntegerField(verbose_name=u"Nombre de titres non localisés dans Alma", default=0)
-    process_num_ppn_inconnus_sudoc = models.SmallIntegerField(verbose_name=u"Nombre de PPN inconnus dans le SUDOC", default=0)
-    process_num_loc_inconnues_sudoc = models.SmallIntegerField(verbose_name=u"Nombre de titres non localisés dans le SUDOC", default=0)
-    process_num_doublons_notices_alma = models.SmallIntegerField(verbose_name=u"Nombre de doublons détectés dans Alma", default=0)
+    process_num_title_to_processed = models.IntegerField(verbose_name=u"Nombre de titres à traiter")
+    process_num_title_processed = models.IntegerField(verbose_name=u"Nombre de titres traités", default=0)
+    process_num_ppn_mal_formate = models.IntegerField(verbose_name=u"Nombre de PPN erronnés", default=0)
+    process_num_ppn_inconnus_alma = models.IntegerField(verbose_name=u"Nombre de PPN inconnus dans Alma", default=0)
+    process_num_loc_inconnues_alma = models.IntegerField(verbose_name=u"Nombre de titres non localisés dans Alma", default=0)
+    process_num_ppn_inconnus_sudoc = models.IntegerField(verbose_name=u"Nombre de PPN inconnus dans le SUDOC", default=0)
+    process_num_loc_inconnues_sudoc = models.IntegerField(verbose_name=u"Nombre de titres non localisés dans le SUDOC", default=0)
+    process_num_doublons_notices_alma = models.IntegerField(verbose_name=u"Nombre de doublons détectés dans Alma", default=0)
     process_user = models.ForeignKey(
             User,
             on_delete=models.CASCADE,
