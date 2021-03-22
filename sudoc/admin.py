@@ -122,7 +122,7 @@ class ProcessAdmin(admin.ModelAdmin):
                                 process_job_type = form.cleaned_data['job_type']
                             )         
                 process.save()
-                logger.info("Process créé")            
+                logger.info("Process cree")            
                 ExecuteJobThread(request.FILES['file'],process).start()
                 request.session['pid'] = process.id
                 messages.success(request, 'L''analyse de recouvrement a été lancée pour la bibliothèque {}. Vous recevrez un meessage sur {} à la fin du traitement'.format(library, user.email))
