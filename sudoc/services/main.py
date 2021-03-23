@@ -1,3 +1,4 @@
+# coding: utf-8
 import re
 import os
 import logging
@@ -62,7 +63,7 @@ def handle_uploaded_file(f,process):
     
     plain_message = loader.render_to_string("sudoc/end_process_message.txt", locals())
     user_email = EmailMessage(
-        "L'analyse de recouvrement est terminee",
+        "L'analyse de recouvrement est terminée",
         plain_message,
         settings.ADMINS[0][1],
         [process.process_user.email],
