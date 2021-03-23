@@ -48,7 +48,7 @@ def handle_uploaded_file(f,process):
                process.save()
 
             num_line += 1
-    logger.debug("Tous les Threads sont terminés  !!!")
+    logger.debug("Tous les Threads sont termines  !!!")
     logger.debug("{}".format(settings.ADMINS[0][1]))
     process.process_is_done = True
     process.process_num_title_processed = num_line
