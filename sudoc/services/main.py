@@ -62,12 +62,12 @@ def handle_uploaded_file(f,process):
     
     plain_message = loader.render_to_string("sudoc/end_process_message.txt", locals())
     user_email = EmailMessage(
-        "L'analyse de recouvrement est terminée",
+        "L'analyse de recouvrement est terminee",
         plain_message,
         settings.ADMINS[0][1],
         [process.process_user.email],
     )
     user_email.send(fail_silently=False)
-    logger.debug("mail envoyé  !!!")
+    logger.debug("mail envoye !!!")
     
     
