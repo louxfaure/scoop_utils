@@ -51,7 +51,7 @@ def exist_in_alma(num_line,ppn,process):
         url= "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs?view=full&expand=p_avail&other_system_id=(PPN){}".format(ppn))
     try:
         r.raise_for_status()  
-    except requests.exceptions.HTTPError:
+    except :
         logger.error("{} :: alma_to_sudoc :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(
                                             ppn,
                                             r.status_code,
