@@ -59,7 +59,7 @@ class Process(models.Model):
     )
 
     def __str__(self):
-        return str("{} - {} - {}".format(self.process_library.library_name,self.process_job_type,self.process_start_date ))
+        return str("{}-{}-{}".format(self.process_library.library_name,self.process_job_type,self.process_start_date ))
 
     class Meta:
         verbose_name = "Analyse de recouvrement"
