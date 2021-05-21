@@ -49,4 +49,4 @@ def exist_in_sudoc(num_line,ppn,process):
                 error_process = process)
             error.save()  
             logger.debug("{} :: N'Existe pas".format(ppn))
-    logger.info("Thread {} - {} fin".format(num_line, ppn))
+    logger.info("Thread {} - {} fin".format(num_line, ppn))

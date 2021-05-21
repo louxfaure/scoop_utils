@@ -32,6 +32,7 @@ def test_localisation(record,library_id):
 def exist_in_alma(num_line,ppn,process):
     # library_id = '3100500000'
     # institution = 'UBM'
+    logger.debug('{}-->{}'.format(ppn,process))
     library_id = process.process_library.library_id
     institution = process.process_library.institution
     api_key = settings.ALMA_API_KEY[institution]

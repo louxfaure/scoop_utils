@@ -88,7 +88,8 @@ class ProcessAdmin(admin.ModelAdmin):
                     'link_process_num_ppn_inconnus_alma',
                     'link_process_num_loc_inconnues_alma',
                     'link_process_num_ppn_inconnus_sudoc',
-                    'link_process_num_loc_inconnues_sudoc')
+                    'link_process_num_loc_inconnues_sudoc',
+                    'link_process_num_doublons_notices_alma')
     ordering = ('process_start_date', 'process_library')
     list_filter = ['process_library','process_job_type', 'process_start_date']
     search_fields = ('process_library', 'process_job_type', 'process_start_date','process_is_done','id')
@@ -137,5 +138,5 @@ class ErrorAdmin(admin.ModelAdmin, ExportMixin):
     list_display = ('error_ppn', 'error_type', 'error_process')
     ordering = ('error_process','error_type')
     list_filter = ['error_process__process_library','error_type','error_process__process_job_type']
-    search_fields = ('error_ppn', 'error_type', 'error_process')
+    search_fields = ['error_ppn', 'error_type']
     actions = ["export_as_csv"]
