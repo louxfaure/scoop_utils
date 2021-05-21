@@ -9,13 +9,13 @@ from requests.packages.urllib3.util.retry import Retry
 from django.conf import settings
 from ..models import Process, Error
 
-#Initialisation des logs
+#Initialisation des logs 
 logger = logging.getLogger(__name__)
 
 def test_localisation(record,library_id):
     root = ET.fromstring(record)
     num_result = int(root.attrib['total_record_count'])
-    print (num_result)
+    logger.debug(num_result)
     if num_result == 0 :
         return("error","PPN_INCONNU_ALMA")
     elif num_result > 1 :
@@ -32,10 +32,11 @@ def test_localisation(record,library_id):
 def exist_in_alma(num_line,ppn,process):
     # library_id = '3100500000'
     # institution = 'UBM'
-    logger.debug('{}-->{}'.format(ppn,process))
+
     library_id = process.process_library.library_id
     institution = process.process_library.institution
     api_key = settings.ALMA_API_KEY[institution]
+    logger.debug('{}-->{}-{}-{}-{}'.format(ppn,process,library_id,institution,api_key))
     # api_key = os.getenv("TEST_UBM_API")
     session = requests.Session()
     retry = Retry(connect=3, backoff_factor=0.5)
@@ -58,7 +59,7 @@ def exist_in_alma(num_line,ppn,process):
                                             r.request.method,
                                             r.url,
                                             r.text))
-    # print (r.content)
+    logger.debug(r)
     statut,code = test_localisation(r.content,library_id)
     if statut == "error" :
         error = Error(  error_ppn = ppn,
@@ -66,7 +67,3 @@ def exist_in_alma(num_line,ppn,process):
                         error_process = process)
         error.save()  
     logger.debug("{} - {}".format(ppn,code))
-
-
-    
-
