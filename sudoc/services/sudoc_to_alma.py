@@ -25,7 +25,7 @@ def test_localisation(record,library_id,ppn):
         for bib in root.findall ("bib"):
             for network_number in bib.findall("network_numbers"):
                 if network_number.find("network_number") is not None :
-                    if network_number.find("network_numbers").text == ppn :
+                    if network_number.find("network_numbers").text == "(PPN){}".format(ppn) :
                         match_ppn =+ 1
                         if bib.find("bib/record/datafield[@tag='AVA']/subfield[@code='b']") is not None :
                             for alma_loc in bib.findall ("bib/record/datafield[@tag='AVA']"):
@@ -40,7 +40,7 @@ def test_localisation(record,library_id,ppn):
                 return("succes","LOC CONNUE ALMA")
             else :
                 return("error","LOC_INCONNUE_ALMA")
-
+        return("error","DOUBLON_ALMA")
     else :
         if root.find("bib/record/datafield[@tag='AVA']/subfield[@code='b']") is not None :
             for alma_loc in root.findall ("bib/record/datafield[@tag='AVA']"):
@@ -51,12 +51,9 @@ def test_localisation(record,library_id,ppn):
 
 
 def exist_in_alma(num_line,ppn,process):
-    # library_id = '3100500000'
-    # institution = 'UBM'
+    logger.debug('TRUC !!!!!!!!!!!!!!')
     library_id = process.process_library.library_id
     institution = process.process_library.institution
-    logger.debug('{}-->{}-{}-{}-{}'.format(ppn,process,library_id,institution,api_key))
-
     api_key = settings.ALMA_API_KEY[institution]
     logger.debug('{}-->{}-{}-{}-{}'.format(ppn,process,library_id,institution,api_key))
     # api_key = os.getenv("TEST_UBM_API")
@@ -81,7 +78,7 @@ def exist_in_alma(num_line,ppn,process):
                                             r.request.method,
                                             r.url,
                                             r.text))
-    statut,code = test_localisation(r.content,library_id,"(PPN){}".format(ppn))
+    statut,code = test_localisation(r.content,library_id,ppn)
     if statut == "error" :
         error = Error(  error_ppn = ppn,
                         error_type = code,

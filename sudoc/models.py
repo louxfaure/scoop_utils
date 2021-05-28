@@ -84,7 +84,7 @@ class Process(models.Model):
                 # sudoc/error/?error_process__id__exact=2&error_type__exact=PPN_INCONNU_SUDOC
             )
         else :
-            return self.process_num_ppn_mal_formate 
+            return 0 
 
     
     def link_process_num_ppn_mal_formate(self):
