@@ -20,3 +20,12 @@
     color: #ccc;
     border-color: #428bca;
 }
+.glyphicon {
+    margin-top: 4px;
+    margin-right: 4px;
+  }
+.invalid-feedback{
+    color: #d9534f;
+    font-size: x-large;
+
+  }
