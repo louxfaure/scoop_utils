@@ -11,6 +11,7 @@ from io import StringIO
 from django.template import loader
 from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
 from django.conf import settings
+from django.core.files.base import ContentFile, File
 from pathlib import Path
 import multiprocessing
 
@@ -89,7 +90,7 @@ def handle_uploaded_file(process):
         api_key = settings.ALMA_TEST_API_KEY[process.institution]
     else :
         api_key = settings.ALMA_API_KEY[process.institution]
-    report_file = '{}/update-item_rapport_{}.csv'.format(create_report_rep(),process.id)
+    report_file = '/home/loux/Téléchargements/tmp/update-item_rapport_{}.csv'.format(process.id)
     # Lecture du fichier
     from_codec = get_encoding_type(process.file_upload.path)
     with open(process.file_upload.path, 'r', encoding=from_codec, newline='') as csvfile:
@@ -115,19 +116,19 @@ def handle_uploaded_file(process):
         idQueue.put(i)
     p = multiprocessing.Pool(8, init, (idQueue,))
     num_line = 0
-    with open(report_file, "w",  encoding='utf-8') as f:
-        f.write("Code-barres\tStatut\tMessage\n")
-        for result in p.imap(thread, rows):
-            num_line += 1
-            f.write("{}\t{}\t{}\n".format(*result))
-            logger.info("{}:{}:{}:{}\n".format(num_line,*result))
-            if num_line%100 == 0 :
-                process.num_title_processed = num_line
-                process.save()
+    report_array = []
+    report_array.append("Code-barres\tStatut\tMessage")
+    for result in p.imap(thread, rows):
+        num_line += 1
+        report_array.append("{}\t{}\t{}".format(*result))
+        logger.info("{}:{}:{}:{}\n".format(num_line,*result))
+        if num_line%100 == 0 :
+            process.num_title_processed = num_line
+            process.save()
+    process.file_download = ContentFile("\n".join(report_array),"update-item_rapport_{}.csv".format(process.id))
     process.is_done = True
     process.num_title_processed = num_line
     process.end_date = timezone.now()
-    process.file_download = report_file
     process.save()
     plain_message = loader.render_to_string("alma/end_process_message.txt", locals())
     user_email = EmailMessage(
