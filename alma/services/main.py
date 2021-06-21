@@ -6,6 +6,7 @@ import json
 from django.utils import timezone
 from chardet import detect
 import csv
+import datetime
 from io import StringIO
 from django.template import loader
 from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
@@ -63,6 +64,24 @@ def thread(x):
             logger.info("{}:{}:{}:{}".format(os.getpid(),barcode,item["item_data"]["barcode"],reponse["item_data"]["barcode"]))
             return barcode, "Succés", "Exemplaire mis à jour"
 
+def create_report_rep():
+    download_rep = "{}/downloads".format(settings.MEDIA_ROOT)
+    date = datetime.datetime.now()
+    #Annee
+    try:
+        os.makedirs("{}/{}/".format(download_rep,date.year))
+    except FileExistsError:
+        # directory already exists
+        pass
+    #Mois
+    try:
+        os.makedirs("{}/{}/{}".format(download_rep,date.year,date.month))
+    except FileExistsError:
+        # directory already exists
+        pass
+    return "{}/{}/{}".format(download_rep,date.year,date.month)
+
+
 
 def handle_uploaded_file(process):
     #Initilaisation de la clef d'API
@@ -70,7 +89,7 @@ def handle_uploaded_file(process):
         api_key = settings.ALMA_TEST_API_KEY[process.institution]
     else :
         api_key = settings.ALMA_API_KEY[process.institution]
-    tmp_file = '/tmp/update-item_rapport_{}.csv'.format(process.id)
+    report_file = '{}/update-item_rapport_{}.csv'.format(create_report_rep(),process.id)
     # Lecture du fichier
     from_codec = get_encoding_type(process.file_upload.path)
     with open(process.file_upload.path, 'r', encoding=from_codec, newline='') as csvfile:
@@ -96,7 +115,7 @@ def handle_uploaded_file(process):
         idQueue.put(i)
     p = multiprocessing.Pool(8, init, (idQueue,))
     num_line = 0
-    with open(tmp_file, "w",  encoding='utf-8') as f:
+    with open(report_file, "w",  encoding='utf-8') as f:
         f.write("Code-barres\tStatut\tMessage\n")
         for result in p.imap(thread, rows):
             num_line += 1
@@ -108,7 +127,7 @@ def handle_uploaded_file(process):
     process.is_done = True
     process.num_title_processed = num_line
     process.end_date = timezone.now()
-    process.file_download = tmp_file
+    process.file_download = report_file
     process.save()
     plain_message = loader.render_to_string("alma/end_process_message.txt", locals())
     user_email = EmailMessage(
