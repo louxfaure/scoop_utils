@@ -11,10 +11,6 @@ import time
 import sys
 from math import *
 
-# internal import
-from mail import mail
-from logs import logs
-
 
 __version__ = '0.1.0'
 __api_version__ = 'v1'
