@@ -115,7 +115,7 @@ def handle_uploaded_file(process):
         "Le traitement des exemplaires est terminée",
         plain_message,
         settings.ADMINS[0][1],
-        [process.process_user.email],
+        [process.user.email],
     )
     user_email.send(fail_silently=False)
     logger.debug("mail envoye !!!")
