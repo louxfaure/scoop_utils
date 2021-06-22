@@ -14,6 +14,7 @@
   {% if app_list %}
   <div class="container-header px-3 py-3 pt-md-5 pb-md-4 mx-auto">
   {% if request.user|has_group:"Opérateur des réservations"%}
+  <h1 class="display-3">Clic et Collecte<h1>
     <h2 class="display-4">Liste des rendez-vous par bibliothèque de retrait des documents</h2>
       <div class="list-group">
       {% if not user.staff.library %}
@@ -35,6 +36,7 @@
       </div>
   {% endif %}
   {% if request.user|has_group:"SUDOC"%}
+  <h1 class="display-3">Outils du SCOOP<h1>
     <h2 class="display-4">Analyses de recouvrements SUDOC </h2>
       <div class="list-group">
           <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_process_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter une Analyse</a>
@@ -42,12 +44,16 @@
           <a class="list-group-item list-group-item-action" href="{% url 'admin:sudoc_library_changelist' %}" title=""><span class="glyphicon glyphicon-education"></span>Déclarer les localisations et RCR du réseau</a>
 
     </div>
+    <h2 class="display-4">Traitement en masse des exemplaires</h2>
+      <div class="list-group">
+          <a class="list-group-item list-group-item-action" href="{% url 'admin:alma_processupdateitem_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter un traitement en masse des exemplaires</a>
+    </div>
 {% endif %}
   {# block superadmin#}
   {% if user.is_superuser %}
-    <h2 class="display-4">Accès administrateur</h2>
+   <h1 class="display-3">Accès administrateur<h1>
     {% for app in app_list %}
-      <h3 class="display-5">{{ app.name }}</h2>
+      <h3 class="display-5">{{ app.name }}</h3>
         <div class="list-group">
         {% for model in app.models %}
             <a class="list-group-item list-group-item-action" href="{% if model.admin_url %}{{ model.admin_url }}{% else %}#{% endif %}" title="{{ app.name }} &raquo; {{ model.name }}" {% if not model.admin_url %}class="disabled"{% endif %}>{{ model.name }}</a>

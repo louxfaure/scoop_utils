@@ -7,7 +7,8 @@
   <li>Ce traitement prend en entrée un fichier csv, txt ou tsv structuré par des ",", ";" ou tabulation.</li>
   <li>La première colonne doit contenir des codes-barres et les colonnes suivantes doivent contenir les nouvelles valeurs des champs à modifier.</li>
   <li>La première ligne doit contenir les noms des colonnes tel que spécifié dans <a href="https://developers.exlibrisgroup.com/alma/apis/docs/xsd/rest_item.xsd/#item_data"> cette documentation.</a></li>
-  <li>Le fichier ne doit pas contenir plus de 50000 lignes </li>
+  <li>Le programme est limité par le nombre d'appel aux Apis autaurisés par institution celui-ci est de 500 000 pour UB et 100 000 pour les autres institutions. 
+  Nous réservons 10 000 appels pour les autres programmes actifs. Ce traitement consomme 2 appels par ligne traitée. Pensez à adapter la taille de vos fichiers.</li>
   <li>VOus ne devez pas lancer plusieurs traitement simultanément.</li>
   </ul>
   </p>

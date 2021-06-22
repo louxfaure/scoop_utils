@@ -20,6 +20,10 @@
     color: #ccc;
     border-color: #428bca;
 }
+.sidebar-menu h3 {
+    color: white;
+    text-transform: uppercase;
+}
 .glyphicon {
     margin-top: 4px;
     margin-right: 4px;

@@ -118,10 +118,15 @@
                 </ul>
               {% endif %}
               {% if request.user|has_group:"SUDOC" or user.is_superuser %}
+              <h3 class="display-4">Analyses de recouvrements SUDOC </h3>
               <ul class="nav nav-sidebar-other">
                 <li><a class="section" href="{% url 'admin:sudoc_process_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter une Analyse</a></li>
                 <li><a class="section" href="{% url 'admin:sudoc_error_changelist' %}" title=""><span class="glyphicon glyphicon-alert"></span>Consulter les anomalies</a></li>
                 <li><a class="section" href="{% url 'admin:sudoc_library_changelist' %}" title=""><span class="glyphicon glyphicon-education"></span>Déclarer les localisations et RCR du réseau</a></li>
+              </ul>
+              <h3 class="display-4">Outils Alma</h3>
+              <ul class="nav nav-sidebar-other">
+                <li><a class="section" href="{% url 'admin:alma_processupdateitem_changelist' %}" title=""><span class="glyphicon glyphicon-cog"></span>Voir ou exécuter un traitement en masse des exemplaires</a></li>
               </ul>
               {% endif %}
             {% else %}
