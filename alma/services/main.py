@@ -22,9 +22,6 @@ from ..models import ProcessUpdateItem
 #Initialisation des logs
 logger = logging.getLogger(__name__)
 
-#Initialisation de l'API
-logger = logging.getLogger(__name__)
-
 
 # get file encoding type
 def get_encoding_type(file):
@@ -64,24 +61,6 @@ def thread(x):
         else :
             logger.info("{}:{}:{}:{}".format(os.getpid(),barcode,item["item_data"]["barcode"],reponse["item_data"]["barcode"]))
             return barcode, "Succés", "Exemplaire mis à jour"
-
-def create_report_rep():
-    download_rep = "{}/downloads".format(settings.MEDIA_ROOT)
-    date = datetime.datetime.now()
-    #Annee
-    try:
-        os.makedirs("{}/{}/".format(download_rep,date.year))
-    except FileExistsError:
-        # directory already exists
-        pass
-    #Mois
-    try:
-        os.makedirs("{}/{}/{}".format(download_rep,date.year,date.month))
-    except FileExistsError:
-        # directory already exists
-        pass
-    return "{}/{}/{}".format(download_rep,date.year,date.month)
-
 
 
 def handle_uploaded_file(process):

@@ -1,6 +1,18 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
 {% load bootstrap4 %}
+<div>
+  <h2 class="display-3">Lancement d'un traitement de modification en masse des exemplaires</h2>
+  <p class="lead"><ul>
+  <li>Ce traitement prend en entrée un fichier csv, txt ou tsv structuré par des ",", ";" ou tabulation.</li>
+  <li>La première colonne doit contenir des codes-barres et les colonnes suivantes doivent contenir les nouvelles valeurs des champs à modifier.</li>
+  <li>La première ligne doit contenir les noms des colonnes tel que spécifié dans <a href="https://developers.exlibrisgroup.com/alma/apis/docs/xsd/rest_item.xsd/#item_data"> cette documentation.</a></li>
+  <li>Le fichier ne doit pas contenir plus de 50000 lignes </li>
+  <li>VOus ne devez pas lancer plusieurs traitement simultanément.</li>
+  </ul>
+  </p>
+
+</div>
 <form action="" method="post" class="form" enctype="multipart/form-data">
     {% csrf_token %}
  {% bootstrap_form form %}

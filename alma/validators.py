@@ -6,7 +6,6 @@ from io import StringIO
 import requests
 from urllib.error import HTTPError
 import xml.etree.ElementTree as ET
-
 #Initialisation des logs
 logger = logging.getLogger(__name__)
 
@@ -17,10 +16,7 @@ def csv_content_validator(csv_upload):
     """Valide le fichier csv :
             -- Teste l'extention
             -- Tesste les délimitateurs
-            -- Teste le nombre de ligne
-            -- Regrade si les collonnes sont bien des champs exemplaires Alma éditable via API
-
-
+            -- Regarde si les collonnes sont bien des champs exemplaires Alma éditable via API
     Args:
         csv_upload ([type]): [description]
 
@@ -63,9 +59,4 @@ def csv_content_validator(csv_upload):
         else :
             raise ValidationError('Erreur nommage colonne : Le champ {} n''est pas un champ exemplaire connu dans Alma'.format(field)) 
     logger.info("Test du nomage des champs terminé")
-    # Teste le nb. de lignes 
-    num_ligne = sum(1 for line in csv_upload)
-    logger.info(num_ligne)
-    if num_ligne > 50000 :
-        raise ValidationError('Le programme ne peut pas traiter plus de 50000 lignes. Votre fichier contient {} lignes'.format(num_ligne))
 

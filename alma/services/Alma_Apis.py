@@ -40,7 +40,8 @@ RESOURCES = {
     'update_record' : 'bibs/{bib_id}',
     'get_item_requests_list' : 'bibs/{bib_id}/holdings/{holding_id}/items/{item_id}/requests?request_type={request_type}&status={status}',
     'delete_request' : 'bibs/{bib_id}/holdings/{holding_id}/items/{item_id}/requests/{request_id}?reason={reason}&notify_user={notify_user}',
-    'ending_process' : 'bibs/{bib_id}/holdings/{holding_id}/items/{item_id}?op=scan&library={library_code}&department={department}&done=true'
+    'ending_process' : 'bibs/{bib_id}/holdings/{holding_id}/items/{item_id}?op=scan&library={library_code}&department={department}&done=true',
+    'test' : 'bibs/test'
 }
 
 NS = {'sru': 'http://www.loc.gov/zing/srw/',
@@ -101,9 +102,16 @@ class AlmaRecords(object):
             error_message = root.find(".//xmlb:errorMessage",NS).text if root.find(".//xmlb:errorMessage",NS).text else response.text 
             error_code = root.find(".//xmlb:errorCode",NS).text if root.find(".//xmlb:errorCode",NS).text else '???'
         else :
-            content = response.json()
+            try :
+             content = response.json()
+            except : 
+                # Parfois l'Api répond avec du xml même si l'en tête demande du Json cas des erreurs de clefs d'API 
+                root = ET.fromstring(response.text)
+                error_message = root.find(".//xmlb:errorMessage",NS).text if root.find(".//xmlb:errorMessage",NS).text else response.text 
+                error_code = root.find(".//xmlb:errorCode",NS).text if root.find(".//xmlb:errorCode",NS).text else '???'
+                return error_code, error_message 
             error_message = content['errorList']['error'][0]['errorMessage']
-            errorCode = content['errorList']['error'][0]['errorCode']
+            error_code = content['errorList']['error'][0]['errorCode']
         return error_code, error_message
     
     def request(self, httpmethod, resource, ids, params={}, data=None,
@@ -387,4 +395,16 @@ class AlmaRecords(object):
             return status, response
         else:
             return status, self.extract_content(response)
+
+    def get_api_remaining (self,accept='json'):
+        """Retourne le nombre d'appel d'API encore autorisé
+
+        Args:
+            accept (str, optional): [description]. Defaults to 'json'.
+        """
+        status, response = self.request('GET', 'test', { 'ids':None }, accept=accept)
+        if status == 'Error':
+            return status, response
+        else:
+            return status, response.headers['X-Exl-Api-Remaining']
 

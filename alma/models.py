@@ -29,10 +29,25 @@ class ProcessUpdateItem(models.Model):
     is_done = models.BooleanField(default=False,verbose_name=u"Traitement terminé ?")
     num_title_to_processed = models.IntegerField(verbose_name=u"Nombre de titres à traiter")
     num_title_processed = models.IntegerField(verbose_name=u"Nombre de titres traités", default=0)
-    file_upload = models.FileField(upload_to='uploads/%Y/%m/%d/')
-    file_download = models.FileField(upload_to='downloads/%Y/%m/%d/')
+    file_upload = models.FileField(verbose_name=u"Fichier traité",upload_to='uploads/%Y/%m/%d/')
+    file_download = models.FileField(verbose_name=u"Rapport de traitement", upload_to='downloads/%Y/%m/%d/')
     user = models.ForeignKey(
             User,
             on_delete=models.CASCADE,
             verbose_name=u"Responsable du traitement"
     )
+
+    class Meta:
+        verbose_name = "Traitement de modification en masse des exemplaires"
+        verbose_name_plural = "Traitements de modification en masse des exemplaires"
+
+    def link_file_download(self):
+        if self.file_download : 
+            return format_html(
+                '<a href="{}">Télécharger le rapport de traitement</a>',
+                self.file_download.url
+            )
+        else :
+            return "-"
+    link_file_download.short_description = "Rapport de traitement"
+    
