@@ -3,6 +3,7 @@ import os
 import json
 import logging
 import xml.etree.ElementTree as ET
+from django.http import response
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -12,63 +13,84 @@ from ..models import Process, Error
 #Initialisation des logs 
 logger = logging.getLogger(__name__)
 
-def test_localisation(record,library_id,ppn):
+ns = {'sru': 'http://www.loc.gov/zing/srw/',
+        'marc': 'http://www.loc.gov/MARC21/slim' }
+
+def get_nb_result(reponsexml):
+    """Retourne le nombre de résultats de la requête
+    Args:
+        reponsexml (xml obj): l'intégralité de la réponse à la reqête sru
+    Returns:
+        int: Nb de résultats
+    """
+    if reponsexml.findall("sru:numberOfRecords",ns):
+        return int(reponsexml.find("sru:numberOfRecords",ns).text)
+    else : 
+        return 0
+
+def test_loc(record,libraryId):
+    """Teste si la bibliothèque "library_id" est localisée sous la notice
+    Args:
+        record ([xml obj]): noeud record
+        libraryId ([type]): id alma de la bibliothèque
+
+    Returns:
+        string : "OK"" si bib localisée
+    """
+    for holding in record.findall(".//marc:datafield[@tag='AVA']",ns):
+        if holding.find("marc:subfield[@code='b']",ns).text == libraryId :
+            return "OK"
+    return "LOC_INCONNUE_ALMA"
+
+def test_other_system_id(record,ppn):
+    for id in record.findall(".//marc:datafield[@tag='035']",ns):
+        if id.find("marc:subfield[@code='a']",ns).text == "(PPN){}".format(ppn) :
+            return True
+    return False
+    
+
+def test_localisation(ppn, record,library_id):
+    logger.debug("test_loc pour {}".format(ppn))
     root = ET.fromstring(record)
-    num_result = int(root.attrib['total_record_count'])
-    logger.debug(num_result)
-    if num_result == 0 :
-        return("error","PPN_INCONNU_ALMA")
-    elif num_result > 1 :
-        # CASE 00960223. l'api retrieve bibs retourne parfois de faux doublon sur un appel au PPN. On va donc tester tous les "Autres numéros système"
-        match_ppn = 0
-        loc_alma = 0
-        for bib in root.findall ("bib"):
-            for network_number in bib.findall("network_numbers"):
-                if network_number.find("network_number") is not None :
-                    if network_number.find("network_numbers").text == "(PPN){}".format(ppn) :
-                        match_ppn =+ 1
-                        if bib.find("bib/record/datafield[@tag='AVA']/subfield[@code='b']") is not None :
-                            for alma_loc in bib.findall ("bib/record/datafield[@tag='AVA']"):
-                                if alma_loc.find("subfield[@code='b']") is not None :
-                                    if alma_loc.find("subfield[@code='b']").text == library_id :
-                                        loc_alma =+ 1
-                        continue
-        if match_ppn > 1 :
-            return("error","DOUBLON_ALMA")
-        else :
-            if loc_alma > 0 :
-                return("succes","LOC CONNUE ALMA")
-            else :
-                return("error","LOC_INCONNUE_ALMA")
-        return("error","DOUBLON_ALMA")
+    nb_result = get_nb_result(root)
+    logger.debug(nb_result)
+    if nb_result == 0 :
+        return ppn,"PPN_INCONNU_ALMA"
+    elif nb_result > 1 :
+        # Case 00968360 parfois Alma retourne plusieurs PPN il faut faire un test supllémentaire
+        nb_ppn = 0
+        for record in root.findall("sru:records/sru:record/sru:recordData/marc:record",ns):
+            if test_other_system_id(record,ppn) :
+                nb_ppn += 1
+                response = test_loc(record,library_id)
+        if nb_ppn == 1:
+            return ppn, response
+        elif nb_ppn > 1 :
+            return ppn,"DOUBLON_ALMA"
+        else : 
+            return ppn,"PPN_INCONNU_ALMA"
     else :
-        if root.find("bib/record/datafield[@tag='AVA']/subfield[@code='b']") is not None :
-            for alma_loc in root.findall ("bib/record/datafield[@tag='AVA']"):
-                if alma_loc.find("subfield[@code='b']") is not None :
-                    if alma_loc.find("subfield[@code='b']").text == library_id :
-                        return("succes","LOC CONNUE ALMA")
-        return("error","LOC_INCONNUE_ALMA")
+        return ppn,test_loc(root.find("sru:records/sru:record/sru:recordData/marc:record",ns),library_id)
 
 
-def exist_in_alma(num_line,ppn,process):
-    logger.debug('TRUC !!!!!!!!!!!!!!')
+
+def exist_in_alma(ppn,process):
     library_id = process.process_library.library_id
     institution = process.process_library.institution
-    api_key = settings.ALMA_API_KEY[institution]
-    logger.debug('{}-->{}-{}-{}-{}'.format(ppn,process,library_id,institution,api_key))
-    # api_key = os.getenv("TEST_UBM_API")
     session = requests.Session()
     retry = Retry(connect=3, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('https://', adapter)
+    url = "https://pudb-{}.alma.exlibrisgroup.com/view/sru/33PUDB_{}?version=1.2&operation=searchRetrieve&format=marcxml&query=alma.other_system_number=(PPN){}".format(institution.lower(),institution,ppn)
+    logger.debug(url)
+
     r = session.request(
         method='GET',
         headers= {
             "User-Agent": "outils_biblio/0.1.0",
-            "Authorization": "apikey {}".format(api_key),
             "Accept": "application/xml"
         },
-        url= "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs?view=full&expand=p_avail&other_system_id=(PPN){}".format(ppn))
+        url= url)
     try:
         r.raise_for_status()  
     except :
@@ -78,10 +100,5 @@ def exist_in_alma(num_line,ppn,process):
                                             r.request.method,
                                             r.url,
                                             r.text))
-    statut,code = test_localisation(r.content,library_id,ppn)
-    if statut == "error" :
-        error = Error(  error_ppn = ppn,
-                        error_type = code,
-                        error_process = process)
-        error.save()  
-    logger.info("{} - {}".format(ppn,code))
+        return(ppn,"PPN_INCONNU_ALMA")
+    return test_localisation(ppn, r.content.decode('utf-8'),library_id)

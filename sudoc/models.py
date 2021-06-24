@@ -118,12 +118,14 @@ class Error(models.Model):
     LOC_INCONNUE_SUDOC = 'LOC_INCONNUE_SUDOC'
     LOC_INCONNUE_ALMA = 'LOC_INCONNUE_ALMA'
     DOUBLON_ALMA = 'DOUBLON_ALMA'
+    ERREUR_REQUETE = 'ERREUR_REQUETE'
     ERROR_TYPE_CHOICES = [  (PPN_INCONNU_SUDOC, 'PPN inconnu dans le SUDOC'),
                             (PPN_INCONNU_ALMA, 'PPN inconnu dans Alma'),
                             (LOC_INCONNUE_ALMA, 'Pas de localisation correspondante dans Alma'),
                             (LOC_INCONNUE_SUDOC, 'Pas de localisation correspondante dans le SUDOC'),
                             (PPN_MAL_FORMATE, 'PPN erronné'),
-                            (DOUBLON_ALMA, 'Plusieurs notices avec le même PPN')]
+                            (DOUBLON_ALMA, 'Plusieurs notices avec le même PPN'),
+                            (ERREUR_REQUETE, 'Erreur lors de l''appel au sru Alma ou au webservice Abes')]
     error_ppn = models.CharField(max_length=50,verbose_name=u"PPN")
     error_type = models.CharField(max_length=30,verbose_name=u"Anomalie",choices=ERROR_TYPE_CHOICES)
     error_process = models.ForeignKey(

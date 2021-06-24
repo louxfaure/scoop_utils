@@ -10,6 +10,8 @@ from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
 from django.conf import settings
 from pathlib import Path
 from concurrent.futures.thread import ThreadPoolExecutor
+from itertools import product
+import multiprocessing
 
 from ..models import Process, Error
 from .alma_to_sudoc import exist_in_sudoc
@@ -18,57 +20,77 @@ from .sudoc_to_alma import exist_in_alma
 #Initialisation des logs
 logger = logging.getLogger(__name__)
 
+class MainProcess(object):
+    def __init__(self, datas, process):
+        self.datas = datas
+        self.process = process
+        logger.debug("{}".format(self.process.process_job_type))
 
-def handle_uploaded_file(f,process):
-    types_analyses = {
-        'ALMA_TO_SUDOC' : exist_in_sudoc,
-        'SUDOC_TO_ALMA' : exist_in_alma
-    }
-    # logger.debug("lecture du fichier")
-    # log_file = open("{}/static/sudoc/rapports/logs_{}_{}.txt".format(Path(__file__).resolve().parent,process.id,process.process_library.library_rcr), "w")
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    def run(self) :
+        ids = [0, 1, 2, 3,4,5]
+        manager = multiprocessing.Manager()
+        idQueue = manager.Queue()
+        for i in ids:
+            idQueue.put(i)
+        p = multiprocessing.Pool(8, self.init, (idQueue,))
         num_line = 0
-        for line in f :
-            line = line.rstrip()
-            clean_ppn = re.search("(^|\(PPN\))([0-9]{8}[0-9Xx]{1})(;|$)", line.decode())
-            if clean_ppn  is None :
-                error = Error(  error_ppn = line.decode(),
-                                error_type = 'PPN_MAL_FORMATE',
-                                error_process = process)
-                error.save()  
-                logger.debug("{} - N'est pas un PPN valide ".format(line.decode()))
-                # log_file.write("{}\t{}\t{}\n".format(num_line,line.decode(),"PPN mal formé"))
-            else :
-                ppn = clean_ppn.group(2)
-                logger.debug("{} - Est un PPN valide ".format(ppn))
-                executor.submit(types_analyses[process.process_job_type], num_line, ppn, process)
-            
-            if num_line%10 == 0 :
-               process.process_num_title_processed = num_line
-               process.save()
-
+        for result in p.imap(self.thread, self.datas):
             num_line += 1
-    logger.info("Tous les Threads sont termines  !!!")
-    logger.debug("{}".format(settings.ADMINS[0][1]))
-    process.process_is_done = True
-    process.process_num_title_processed = num_line
-    process.process_end_date = timezone.now()
-    process.process_num_ppn_mal_formate = Error.objects.filter(error_process=process,error_type='PPN_MAL_FORMATE').count()
-    process.process_num_ppn_inconnus_alma = Error.objects.filter(error_process=process,error_type='PPN_INCONNU_ALMA').count()
-    process.process_num_ppn_inconnus_sudoc = Error.objects.filter(error_process=process,error_type='PPN_INCONNU_SUDOC').count()
-    process.process_num_loc_inconnues_alma = Error.objects.filter(error_process=process,error_type='LOC_INCONNUE_ALMA').count()
-    process.process_num_loc_inconnues_sudoc = Error.objects.filter(error_process=process,error_type='LOC_INCONNUE_SUDOC').count()
-    process.process_num_doublons_notices_alma = Error.objects.filter(error_process=process,error_type='DOUBLON_ALMA').count()
-    process.save()
-    
-    plain_message = loader.render_to_string("sudoc/end_process_message.txt", locals())
-    user_email = EmailMessage(
-        "L'analyse de recouvrement est terminée",
-        plain_message,
-        settings.ADMINS[0][1],
-        [process.process_user.email],
-    )
-    user_email.send(fail_silently=False)
-    logger.debug("mail envoye !!!")
+            ppn, error_code = result
+            logger.info("{}:{}:{}\n".format(num_line,ppn, error_code))
+            if error_code != 'OK' :
+                error = Error(  error_ppn = ppn,
+                    error_type = error_code,
+                    error_process = self.process)
+                error.save()
+            if num_line%100 == 0 :
+                self.process.process_num_title_processed = num_line
+                self.process.save()
+        logger.info("Tous les Threads sont termines  !!!")
+        logger.debug("{}".format(settings.ADMINS[0][1]))
+        self.process.process_is_done = True
+        self.process.process_num_title_processed = num_line
+        self.process.process_end_date = timezone.now()
+        self.process.process_num_ppn_mal_formate = Error.objects.filter(error_process=self.process,error_type='PPN_MAL_FORMATE').count()
+        self.process.process_num_ppn_inconnus_alma = Error.objects.filter(error_process=self.process,error_type='PPN_INCONNU_ALMA').count()
+        self.process.process_num_ppn_inconnus_sudoc = Error.objects.filter(error_process=self.process,error_type='PPN_INCONNU_SUDOC').count()
+        self.process.process_num_loc_inconnues_alma = Error.objects.filter(error_process=self.process,error_type='LOC_INCONNUE_ALMA').count()
+        self.process.process_num_loc_inconnues_sudoc = Error.objects.filter(error_process=self.process,error_type='LOC_INCONNUE_SUDOC').count()
+        self.process.process_num_doublons_notices_alma = Error.objects.filter(error_process=self.process,error_type='DOUBLON_ALMA').count()
+        self.process.save()
+        
+        plain_message = loader.render_to_string("sudoc/end_process_message.txt", locals())
+        user_email = EmailMessage(
+            "L'analyse de recouvrement est terminée",
+            plain_message,
+            settings.ADMINS[0][1],
+            [self.process.process_user.email],
+        )
+        user_email.send(fail_silently=False)
+        logger.debug("mail envoye !!!")
+
+
+    def init(self,queue):
+        global idx
+        idx = queue.get()
+
+    def thread(self,line):
+        global idx
+        types_analyses = {
+            'ALMA_TO_SUDOC' : exist_in_sudoc,
+            'SUDOC_TO_ALMA' : exist_in_alma
+        }
+        process_id = multiprocessing.current_process()
+        logger.debug("{} - {} ".format(self.process.process_job_type,line.decode()))
+        clean_ppn = re.search("(^|\(PPN\))([0-9]{8}[0-9Xx]{1})(;|$)", line.decode())
+        if clean_ppn  is None :
+            logger.debug("{} - N'est pas un PPN valide ".format(line.decode()))
+            return(line.decode(),'PPN_MAL_FORMATE')
+        else :
+            ppn = clean_ppn.group(2)
+            logger.debug("{} - Est un PPN valide ".format(ppn))
+            return types_analyses[self.process.process_job_type](ppn, self.process)
+
+
     
     

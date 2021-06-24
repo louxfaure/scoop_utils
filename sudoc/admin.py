@@ -25,7 +25,8 @@ class ExecuteJobThread(threading.Thread):
 
     def run(self):
         logger.debug("Lancement du traitement ExecuteJobThread")
-        main.handle_uploaded_file(self.upload_file,self.process)
+        handle_uploaded_file = main.MainProcess(self.upload_file,self.process)
+        handle_uploaded_file.run()
         logger.debug("Ending ExecuteJobThread")
 
 # EXport en CSV
@@ -123,8 +124,12 @@ class ProcessAdmin(admin.ModelAdmin):
                                 process_job_type = form.cleaned_data['job_type']
                             )         
                 process.save()
-                logger.info("Process cree")            
-                ExecuteJobThread(request.FILES['file'],process).start()
+                logger.info("Process cree")
+                lines=[]
+                for line in request.FILES['file']:
+                    line = line.rstrip()
+                    lines.append(line)           
+                ExecuteJobThread(lines,process).start()
                 request.session['pid'] = process.id
                 messages.success(request, 'L''analyse de recouvrement a été lancée pour la bibliothèque {}. Vous recevrez un meessage sur {} à la fin du traitement'.format(library, user.email))
                 return HttpResponseRedirect("/admin/sudoc/process/")
