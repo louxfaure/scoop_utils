@@ -67,7 +67,7 @@ class UpdateItemProcesss(admin.ModelAdmin):
                     messages.error(request,"L'API Alma remonte l'erreur suivante :  {}".format(nb_api_call))
                     return HttpResponseRedirect("/admin/alma/processupdateitem/add")
                 num_ligne = sum(1 for line in request.FILES['file']) - 1
-                if (num_ligne*2) > (int(nb_api_call) - 10000) :
+                if (num_ligne*3) > (int(nb_api_call) - 10000) :
                     messages.error(request,"Nous ne disposons que de {} appels d'API pour la journée. Votre fichier contient {} lignes. Il faut deux appels par ligne pour traiter le fichier. Merci de diminuer le nombre de lignes à traiter".format(nb_api_call,num_ligne))
                     return HttpResponseRedirect("/admin/alma/processupdateitem/add")
                 # Teste si institution possède bien une base de test

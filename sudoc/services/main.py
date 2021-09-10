@@ -36,11 +36,12 @@ class MainProcess(object):
         num_line = 0
         for result in p.imap(self.thread, self.datas):
             num_line += 1
-            ppn, error_code = result
-            logger.info("{}:{}:{}\n".format(num_line,ppn, error_code))
+            ppn, error_code, error_message = result
+            logger.info("{}:{}:{}:{}\n".format(num_line,ppn, error_code,error_message))
             if error_code != 'OK' :
                 error = Error(  error_ppn = ppn,
                     error_type = error_code,
+                    error_message = error_message,
                     error_process = self.process)
                 error.save()
             if num_line%100 == 0 :
@@ -57,6 +58,7 @@ class MainProcess(object):
         self.process.process_num_loc_inconnues_alma = Error.objects.filter(error_process=self.process,error_type='LOC_INCONNUE_ALMA').count()
         self.process.process_num_loc_inconnues_sudoc = Error.objects.filter(error_process=self.process,error_type='LOC_INCONNUE_SUDOC').count()
         self.process.process_num_doublons_notices_alma = Error.objects.filter(error_process=self.process,error_type='DOUBLON_ALMA').count()
+        self.process.process_num_erreurs_requetes = Error.objects.filter(error_process=self.process,error_type='ERREUR_REQUETE').count()
         self.process.save()
         
         plain_message = loader.render_to_string("sudoc/end_process_message.txt", locals())

@@ -52,6 +52,7 @@ class Process(models.Model):
     process_num_ppn_inconnus_sudoc = models.IntegerField(verbose_name=u"Nombre de PPN inconnus dans le SUDOC", default=0)
     process_num_loc_inconnues_sudoc = models.IntegerField(verbose_name=u"Nombre de titres non localisés dans le SUDOC", default=0)
     process_num_doublons_notices_alma = models.IntegerField(verbose_name=u"Nombre de doublons détectés dans Alma", default=0)
+    process_num_erreurs_requetes = models.IntegerField(verbose_name=u"Nombre d'erreurs liés à des pbs de communication avec les web services abes ou alma'", default=0)
     process_user = models.ForeignKey(
             User,
             on_delete=models.CASCADE,
@@ -72,7 +73,8 @@ class Process(models.Model):
             'process_num_loc_inconnues_alma' : 'LOC_INCONNUE_ALMA',
             'process_num_ppn_inconnus_sudoc' : 'PPN_INCONNU_SUDOC',
             'process_num_loc_inconnues_sudoc' : 'LOC_INCONNUE_SUDOC',
-            'process_num_doublons_notices_alma' : 'DOUBLON_ALMA'
+            'process_num_doublons_notices_alma' : 'DOUBLON_ALMA',
+            'process_num_erreurs_requetes' : 'ERREUR_REQUETE'
         }
         if getattr(self,attr) > 0 :
             return format_html(
@@ -111,6 +113,10 @@ class Process(models.Model):
             return self.get_url('process_num_doublons_notices_alma')
     link_process_num_doublons_notices_alma.short_description = "Nombre de doublons détectés dans Alma"
 
+    def link_process_num_erreurs_requetes(self):
+            return self.get_url('process_num_erreurs_requetes')
+    link_process_num_erreurs_requetes.short_description = "Nombre d'ereurs réseau"
+
 class Error(models.Model):
     PPN_MAL_FORMATE = 'PPN_MAL_FORMATE'
     PPN_INCONNU_SUDOC = 'PPN_INCONNU_SUDOC'
@@ -133,6 +139,7 @@ class Error(models.Model):
             on_delete=models.CASCADE,
             verbose_name=u"Traitement"
     )
+    error_message = models.CharField(max_length=500,verbose_name=u"Message d'erreur",null=True)
 
     def __str__(self):
         return str("{} - {}".format(self.error_ppn, self.error_type ))

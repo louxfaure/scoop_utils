@@ -14,7 +14,8 @@ from ..models import Process, Error
 logger = logging.getLogger(__name__)
 
 ns = {'sru': 'http://www.loc.gov/zing/srw/',
-        'marc': 'http://www.loc.gov/MARC21/slim' }
+        'marc': 'http://www.loc.gov/MARC21/slim',
+        'diag':  'http://www.loc.gov/zing/srw/diagnostic/'}
 
 def get_nb_result(reponsexml):
     """Retourne le nombre de résultats de la requête
@@ -47,30 +48,38 @@ def test_other_system_id(record,ppn):
         if id.find("marc:subfield[@code='a']",ns).text == "(PPN){}".format(ppn) :
             return True
     return False
-    
+
+def test_notices_mutiples(records,ppn,library_id):
+    nb_ppn = 0
+    for record in records.findall("sru:records/sru:record/sru:recordData/marc:record",ns):
+        if test_other_system_id(record,ppn) :
+            nb_ppn += 1
+            response = test_loc(record,library_id)
+    if nb_ppn == 1:
+        return ppn, response
+    elif nb_ppn > 1 :
+        return ppn,"DOUBLON_ALMA"
+    else : 
+        return ppn,"PPN_INCONNU_ALMA"
+
+# def test_erreur_sru(ppn,root) :
+
 
 def test_localisation(ppn, record,library_id):
     logger.debug("test_loc pour {}".format(ppn))
     root = ET.fromstring(record)
+    # Case 00968669 Le SRU retounec des erreures inexpliquées
+    if root.find("sru:diagnostics/diag:diagnostic",ns):
+        return ppn,"ERREUR_REQUETE",root.find("sru:diagnostics/diag:diagnostic",ns).text
     nb_result = get_nb_result(root)
     logger.debug(nb_result)
     if nb_result == 0 :
-        return ppn,"PPN_INCONNU_ALMA"
+        return ppn,"PPN_INCONNU_ALMA",None
     elif nb_result > 1 :
         # Case 00968360 parfois Alma retourne plusieurs PPN il faut faire un test supllémentaire
-        nb_ppn = 0
-        for record in root.findall("sru:records/sru:record/sru:recordData/marc:record",ns):
-            if test_other_system_id(record,ppn) :
-                nb_ppn += 1
-                response = test_loc(record,library_id)
-        if nb_ppn == 1:
-            return ppn, response
-        elif nb_ppn > 1 :
-            return ppn,"DOUBLON_ALMA"
-        else : 
-            return ppn,"PPN_INCONNU_ALMA"
+        return test_notices_mutiples(root,ppn,library_id)
     else :
-        return ppn,test_loc(root.find("sru:records/sru:record/sru:recordData/marc:record",ns),library_id)
+        return ppn,test_loc(root.find("sru:records/sru:record/sru:recordData/marc:record",ns),library_id),None
 
 
 
