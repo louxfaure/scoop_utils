@@ -131,7 +131,10 @@ class AlmaRecords(object):
         try:
             response.raise_for_status()  
         except requests.exceptions.HTTPError:
-            error_code, error_message= self.get_error_message(response,accept)
+            if response.status_code == 400 :
+                return 'Error', "{} -- {}".format(400, response)
+            else :
+                error_code, error_message= self.get_error_message(response,accept)
             if error_code == "401873" :
                 return 'Error', "{} -- {}".format(error_code, "Notice innconnue")
             self.logger.error("Alma_Apis :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(response.status_code,response.request.method, response.url, response.text))

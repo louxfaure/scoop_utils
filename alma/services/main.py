@@ -40,8 +40,10 @@ def thread(x):
     barcode = x[2]
     process = multiprocessing.current_process()
     alma_api = AlmaRecords(apikey=api_key, region='EU', service=__name__)
+
     status,item = alma_api.get_item_with_barcode(barcode, accept='json')
     # logger.info("{}:{}:{}:{}:{}".format(x[1],x[2],x[3],x[4],x[5]))
+    complex_fields = ["pattern_type","library","alternative_call_number_type","physical_condition","permanent_call_number_type","temp_library","temp_location","temp_call_number_type","temp_policy","policy","break_indicator"]
     if status == "Error" :
         logger.error("{}:{}:{}:{}".format(idx,process.pid,barcode,item))
         return barcode,"Erreur",item
@@ -52,7 +54,10 @@ def thread(x):
         holding_id = item["holding_data"]["holding_id"]
         item_id = item["item_data"]["pid"]
         for field in headers:
-            item["item_data"][field] = x[i]
+            if field in complex_fields :
+                item["item_data"][field]["value"] = x[i]
+            else :
+                item["item_data"][field] = x[i]
             i += 1
         status,reponse = alma_api.set_item(bib_id, holding_id, item_id, json.dumps(item), content_type='json', accept='json')
         if status == "Error" :
