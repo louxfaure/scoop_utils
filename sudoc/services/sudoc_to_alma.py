@@ -40,7 +40,7 @@ def test_loc(record,libraryId):
     """
     for holding in record.findall(".//marc:datafield[@tag='AVA']",ns):
         if holding.find("marc:subfield[@code='b']",ns).text == libraryId :
-            return "OK"
+            return "OK", "Bib. localisée"
     return "LOC_INCONNUE_ALMA", "Aucune localisation existe sous la notice pour la bibliothèque"
 
 def test_other_system_id(record,ppn):
