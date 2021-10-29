@@ -52,9 +52,10 @@ class ModesExport:
 
         meta = self.model._meta
         field_names = [field.name for field in meta.fields]
-
+        first_result = queryset.first()
+        file_name = "{}_{}_{}".format(first_result.error_process.process_library.library_name,first_result.error_process.process_job_type,first_result.error_type)
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+        response['Content-Disposition'] = 'attachment; filename={}.csv'.format(file_name)
         writer = csv.writer(response)
 
         writer.writerow(field_names)
