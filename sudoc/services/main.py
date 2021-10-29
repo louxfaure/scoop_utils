@@ -39,7 +39,8 @@ class MainProcess(object):
             p = multiprocessing.Pool(8, self.init, (idQueue,))
             for result in p.imap(self.thread, self.datas):
                 num_line += 1
-                ppn, error_code, error_message = result
+                logger.info(result)
+                ppn, (error_code, error_message) = result
                 logger.info("{}:{}:{}:{}\n".format(num_line,ppn, error_code,error_message))
                 if error_code != 'OK' :
                     error = Error(  error_ppn = ppn,

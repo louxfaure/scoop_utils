@@ -58,9 +58,9 @@ def test_notices_mutiples(records,ppn,library_id):
     if nb_ppn == 1:
         return ppn, response
     elif nb_ppn > 1 :
-        return ppn,"DOUBLON_ALMA", "Le sru remonte deux résultats pour le même ppn"
+        return ppn,("DOUBLON_ALMA", "Le sru remonte deux résultats pour le même ppn")
     else : 
-        return ppn,"PPN_INCONNU_ALMA", "Le sru ne remonte aucun résultat pour le ppn"
+        return ppn,("PPN_INCONNU_ALMA", "Le sru ne remonte aucun résultat pour le ppn")
 
 # def test_erreur_sru(ppn,root) :
 
@@ -70,11 +70,11 @@ def test_localisation(ppn, record,library_id):
     root = ET.fromstring(record)
     # Case 00968669 Le SRU retoune des erreures inexpliquées
     if root.find("sru:diagnostics/diag:diagnostic/diag:message",ns):
-        return ppn,"ERREUR_REQUETE",root.find("sru:diagnostics/diag:diagnostic/diag:message",ns).text
+        return ppn,("ERREUR_REQUETE",root.find("sru:diagnostics/diag:diagnostic/diag:message",ns).text)
     nb_result = get_nb_result(root)
     logger.debug(nb_result)
     if nb_result == 0 :
-        return ppn,"PPN_INCONNU_ALMA","Le sru ne remonte aucun résultat pour le ppn"
+        return ppn,("PPN_INCONNU_ALMA","Le sru ne remonte aucun résultat pour le ppn")
     elif nb_result > 1 :
         # Case 00968360 parfois Alma retourne plusieurs PPN il faut faire un test supplémentaire
         return test_notices_mutiples(root,ppn,library_id)
@@ -109,5 +109,5 @@ def exist_in_alma(ppn,process):
                                             r.request.method,
                                             r.url,
                                             r.text))
-        return(ppn,"PPN_INCONNU_ALMA",r.text)
+        return(ppn,("PPN_INCONNU_ALMA",r.text))
     return test_localisation(ppn, r.content.decode('utf-8'),library_id)
