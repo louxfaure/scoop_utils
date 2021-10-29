@@ -41,7 +41,7 @@ def test_loc(record,libraryId):
     for holding in record.findall(".//marc:datafield[@tag='AVA']",ns):
         if holding.find("marc:subfield[@code='b']",ns).text == libraryId :
             return "OK"
-    return "LOC_INCONNUE_ALMA"
+    return "LOC_INCONNUE_ALMA", "Le SRU remonte une notice pour le PPN mais aucune localisation n'existe pour la bibliothèque"
 
 def test_other_system_id(record,ppn):
     for id in record.findall(".//marc:datafield[@tag='035']",ns):
@@ -58,9 +58,9 @@ def test_notices_mutiples(records,ppn,library_id):
     if nb_ppn == 1:
         return ppn, response
     elif nb_ppn > 1 :
-        return ppn,"DOUBLON_ALMA"
+        return ppn,"DOUBLON_ALMA", "Le sru remonte deux résultats pour le même ppn"
     else : 
-        return ppn,"PPN_INCONNU_ALMA"
+        return ppn,"PPN_INCONNU_ALMA", "Le sru ne remonte aucun résultat pour le ppn"
 
 # def test_erreur_sru(ppn,root) :
 
@@ -68,15 +68,15 @@ def test_notices_mutiples(records,ppn,library_id):
 def test_localisation(ppn, record,library_id):
     logger.debug("test_loc pour {}".format(ppn))
     root = ET.fromstring(record)
-    # Case 00968669 Le SRU retounec des erreures inexpliquées
-    if root.find("sru:diagnostics/diag:diagnostic",ns):
-        return ppn,"ERREUR_REQUETE",root.find("sru:diagnostics/diag:diagnostic",ns).text
+    # Case 00968669 Le SRU retoune des erreures inexpliquées
+    if root.find("sru:diagnostics/diag:diagnostic/diag:message",ns):
+        return ppn,"ERREUR_REQUETE",root.find("sru:diagnostics/diag:diagnostic/diag:message",ns).text
     nb_result = get_nb_result(root)
     logger.debug(nb_result)
     if nb_result == 0 :
-        return ppn,"PPN_INCONNU_ALMA",None
+        return ppn,"PPN_INCONNU_ALMA","Le sru ne remonte aucun résultat pour le ppn"
     elif nb_result > 1 :
-        # Case 00968360 parfois Alma retourne plusieurs PPN il faut faire un test supllémentaire
+        # Case 00968360 parfois Alma retourne plusieurs PPN il faut faire un test supplémentaire
         return test_notices_mutiples(root,ppn,library_id)
     else :
         return ppn,test_loc(root.find("sru:records/sru:record/sru:recordData/marc:record",ns),library_id),None
@@ -103,11 +103,11 @@ def exist_in_alma(ppn,process):
     try:
         r.raise_for_status()  
     except :
-        logger.error("{} :: alma_to_sudoc :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(
+        logger.error("{} :: sudoc_to_sudoc :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(
                                             ppn,
                                             r.status_code,
                                             r.request.method,
                                             r.url,
                                             r.text))
-        return(ppn,"PPN_INCONNU_ALMA")
+        return(ppn,"PPN_INCONNU_ALMA",r.text)
     return test_localisation(ppn, r.content.decode('utf-8'),library_id)
