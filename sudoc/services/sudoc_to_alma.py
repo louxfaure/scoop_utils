@@ -41,7 +41,7 @@ def test_loc(record,libraryId):
     for holding in record.findall(".//marc:datafield[@tag='AVA']",ns):
         if holding.find("marc:subfield[@code='b']",ns).text == libraryId :
             return "OK"
-    return "LOC_INCONNUE_ALMA", "Le SRU remonte une notice pour le PPN mais aucune localisation n'existe pour la bibliothèque"
+    return "LOC_INCONNUE_ALMA", "Aucune localisation existe sous la notice pour la bibliothèque"
 
 def test_other_system_id(record,ppn):
     for id in record.findall(".//marc:datafield[@tag='035']",ns):
@@ -79,7 +79,7 @@ def test_localisation(ppn, record,library_id):
         # Case 00968360 parfois Alma retourne plusieurs PPN il faut faire un test supplémentaire
         return test_notices_mutiples(root,ppn,library_id)
     else :
-        return ppn,test_loc(root.find("sru:records/sru:record/sru:recordData/marc:record",ns),library_id),None
+        return ppn,test_loc(root.find("sru:records/sru:record/sru:recordData/marc:record",ns),library_id)
 
 
 
