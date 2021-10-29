@@ -90,7 +90,7 @@ def exist_in_alma(ppn,process):
     retry = Retry(connect=3, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('https://', adapter)
-    url = "https://pudb-{}.alma.exlibrisgroup.com/view/sru/33PUDB_{}?version=1.2&operation=searchRetrieve&format=marcxml&query=alma.other_system_number==(PPN){}".format(institution.lower(),institution,ppn)
+    url = "https://pudb-{}.alma.exlibrisgroup.com/view/sru/33PUDB_{}?version=1.2&operation=searchRetrieve&format=marcxml&query=alma.other_system_number=(PPN){}".format(institution.lower(),institution,ppn)
     logger.debug(url)
 
     r = session.request(
