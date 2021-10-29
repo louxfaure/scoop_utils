@@ -1,19 +1,36 @@
+from math import ceil
 from django.contrib import admin
 from django.http import HttpResponse,HttpResponseRedirect
 from django.conf.urls import url
 from django.urls import path
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.conf import settings
 from .models import Library, Process, Error
 from .forms import UploadFileForm
-from .services import main
+from .services import main,Alma_Sets
 import csv
 import logging
 import threading
+import re
 # Register your models here.
 
 #Initialisation des logs
 logger = logging.getLogger(__name__)
+
+def chunks(lst, n):
+    """Tronçonne une liste en listes de n éléments 
+
+    Args:
+        lst (array): liste à tronçonner
+        n (int): taille des sous-ensembles
+
+    Yields:
+        array : liste de listes
+    """
+
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 #Thread pour le lancement du traitement
 class ExecuteJobThread(threading.Thread):
@@ -30,7 +47,7 @@ class ExecuteJobThread(threading.Thread):
         logger.debug("Ending ExecuteJobThread")
 
 # EXport en CSV
-class ExportMixin:
+class ModesExport:
     def export_as_csv(self, request, queryset):
 
         meta = self.model._meta
@@ -49,28 +66,47 @@ class ExportMixin:
     export_as_csv.short_description = "Exporter en CSV"
 
     def export_as_set(self, request, queryset):
-        print(queryset)
-        for obj in queryset:
-            print(obj.error_ppn)
-
-        # meta = self.model._meta
-        # field_names = [field.name for field in meta.fields]
-
-        # response = HttpResponse(content_type='text/csv')
-        # response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
-        # writer = csv.writer(response)
-
-        # writer.writerow(field_names)
-        # for obj in queryset:
-        #     row = writer.writerow([getattr(obj, field) for field in field_names])
-
-        # return response
+        #Permet de faire un set avec les notices en erreur 
+        first_result = queryset.first()
+        if first_result.error_process.process_job_type == 'SUDOC_TO_ALMA' :
+            messages.error(request, "La création des jeux de résultat n'est pas disponible pour les anomalies issues du recouvrement Sudoc vers Alma. Utilisez l'export CSV.")
+            return HttpResponseRedirect(request.path_info)  
+        set_name = "{}_{}".format(first_result.error_process,first_result.error_type)     
+        apikey=settings.ALMA_API_KEY[first_result.error_process.process_library.institution]
+        #On créé un set que l'on va ensuite alimenter. On e peut créeer dire'ctement un set alimenté avec des PPNS 
+        api_set = Alma_Sets.Set(apikey=apikey)
+        error,reponse = api_set.create_set(set_name)
+        logger.debug(reponse)
+        # error = False
+        if error :
+            messages.error(request,"Le jeux de résultat n'a pas pu être créé. {}".format(reponse))
+        else : 
+            logger.debug(ceil(queryset.count()/2))
+        # On va ajouter nos PPNS dans le set =. On est limité à 1000 ppn par envoi
+            nb_ligne = 0
+            members_list = []
+            for obj in queryset:
+                nb_ligne += 1
+                members_list.append({"id" : "(PPN){}".format(obj.error_ppn)})
+                logger.debug(obj.error_ppn)
+                if nb_ligne%1000 == 0 :
+                    error,reponse = api_set.update_set(reponse,members_list,set_name)
+                    members_list = []
+                    if error :
+                        messages.error(request,"Le jeux de résultat n'a pas pu être créé. {}".format(reponse))
+                        break    
+            if len(members_list) > 0 :     
+                error,reponse = api_set.update_set(reponse,members_list,set_name)
+                if error :
+                    messages.error(request,"Le jeux de résultat n'a pas pu être créé. {}".format(reponse))
+                else :
+                    messages.success(request, 'Un set a été créé')
 
     export_as_set.short_description = "Créer un jeu de résultat Alma"
 
 
 @admin.register(Library)
-class LibraryAdmin(admin.ModelAdmin,ExportMixin):
+class LibraryAdmin(admin.ModelAdmin,ModesExport):
     list_display = ('library_id', 'library_rcr', 'library_name', 'institution')
     ordering = ('library_name', 'institution')
     search_fields = ('library_id', 'library_rcr', 'library_name')
@@ -129,8 +165,24 @@ class ProcessAdmin(admin.ModelAdmin):
                 lines=[]
                 for line in request.FILES['file']:
                     line = line.rstrip()
-                    lines.append(line)           
-                ExecuteJobThread(lines,process).start()
+                    clean_ppn = re.search("(^|\(PPN\))([0-9]{8}[0-9Xx]{1})(;|$)", line.decode())
+                    if clean_ppn  is None :
+                        logger.debug("{} - N'est pas un PPN valide ".format(line.decode()))
+                        error = Error(  error_ppn = line.decode(),
+                                error_type = 'PPN_MAL_FORMATE',
+                                error_process = process)
+                        error.save()
+                    else :
+                        lines.append(clean_ppn.group(2))
+                logger.debug(lines)
+                process.process_num_ppn_mal_formate = Error.objects.filter(error_process=process,error_type='PPN_MAL_FORMATE').count()
+                process.save()
+                #Lancement de l'analyse de recouvrement Alma vers le SUDOC 
+                if process.process_job_type == "ALMA_TO_SUDOC" :
+                    lines = list(chunks(lines,50))
+                #Lancement de l'analyse de recouvrement Sudoc vers Alma
+                else :
+                    ExecuteJobThread(lines,process).start()
                 request.session['pid'] = process.id
                 messages.success(request, 'L''analyse de recouvrement a été lancée pour la bibliothèque {}. Vous recevrez un meessage sur {} à la fin du traitement'.format(library, user.email))
                 return HttpResponseRedirect("/admin/sudoc/process/")
@@ -140,9 +192,9 @@ class ProcessAdmin(admin.ModelAdmin):
         return render(request, "sudoc/execute-process.html", locals())
 
 @admin.register(Error)
-class ErrorAdmin(admin.ModelAdmin, ExportMixin):
+class ErrorAdmin(admin.ModelAdmin, ModesExport):
     list_display = ('error_ppn', 'error_type', 'error_process','error_message')
     ordering = ('error_process','error_type')
     list_filter = ['error_process__process_library','error_type','error_process__process_job_type']
     search_fields = ['error_ppn', 'error_type']
-    actions = ["export_as_csv"]
+    actions = ["export_as_csv", "export_as_set"]

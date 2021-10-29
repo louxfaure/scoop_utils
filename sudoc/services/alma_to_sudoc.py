@@ -11,22 +11,27 @@ import time
 from django.conf import settings
 
 from ..models import Process, Error
-# from .alma_to_sudoc import exist_in_sudoc
-# from .sudoc_to_alma import exist_in_alma
 
 #Initialisation des logs
 logger = logging.getLogger(__name__)
 
-def test_localisation(record,rcr):
-    root = ET.fromstring(record)
-    for library in root.findall(".//library"):
+def test_localisation(librairies,rcr):
+    for library in librairies:
         if rcr == library.attrib['rcr'] :
             return True
     return False
 
-def exist_in_sudoc(ppn,process):
+def exist_in_sudoc(ppns_list,process):
+    """Teste pour une liste de PPN et un RCR données si une localisation existe dans le SUDOC
+
+    Args:
+        ppns_list (array): liste de ppn
+        process (objec): traitement pour lequel la liste doit être traitée conctient le rcr process.process_library.library_rcr
+    """
+ 
     rcr = process.process_library.library_rcr
-    logger.info("Thread {} début".format(ppn))
+    logger.info("Thread {} début".format(ppns_list))
+    # Préparation et envoie de la requête à l'ABES
     session = requests.Session()
     retry = Retry(connect=3, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
@@ -37,30 +42,37 @@ def exist_in_sudoc(ppn,process):
             "User-Agent": "outils_biblio/0.1.0",
             "Accept": "application/xml"
         },
-        url= 'https://www.sudoc.fr/services/where/15/{}.xml'.format(ppn))
+        url= 'https://www.sudoc.fr/services/where/15/{}.xml'.format(','.join(ppns_list)))
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError:
-        logger.error("{} :: alma_to_sudoc :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(ppn, r.status_code, r.request.method, r.url, r.text))
-        # log_file.write("{}\t{}\t{}\n".format(num_line,ppn,"PPN inconnu"))
-        # error = Error(  error_ppn = ppn,
-        #         error_type = 'PPN_INCONNU_SUDOC',
-        #         error_process = process)        
-        # error.save() 
-        return ppn, 'PPN_INCONNU_SUDOC'
+        logger.error("{} :: alma_to_sudoc :: HTTP Status: {} || Method: {} || URL: {} || Response: {}".format(','.join(ppns_list), r.status_code, r.request.method, r.url, r.text))
+        # Si le service ne répond pas pour la requête on créé une erreur pour chaque PPN
+        for ppn in ppns_list :
+            error = Error(  error_ppn = ppn,
+                    error_type = 'ERREUR_REQUETE',
+                    error_process = process)        
+            error.save() 
+    #Traitement des résultats
     else:
-        record = r.content.decode('utf-8')
-        is_located = test_localisation(record,rcr)
-        if is_located :
-            # log_file.write("{}\t{}\t{}\n".format(num_line,ppn,"Localisé dans le SUDOC"))
-            logger.debug("{} :: Existe".format(ppn))
-            return ppn, 'OK'
-        else :
-            # log_file.write("{}\t{}\t{}\n".format(num_line,ppn,"Non localisé dans le SUDOC"))
-            # error = Error(  error_ppn = ppn,
-            #     error_type = 'LOC_INCONNUE_SUDOC',
-            #     error_process = process)
-            # error.save()
-            return ppn, 'LOC_INCONNUE_SUDOC'  
-            logger.debug("{} :: N'Existe pas".format(ppn))
-    logger.info("Thread {} fin".format(ppn))
+        ppns_requetes = [] 
+        ppns_connus =[] #Liste des ppns retrouvés par le web service
+        results = r.content.decode('utf-8')
+        root = ET.fromstring(results)
+        #Pour chaque résultat 
+        for result in root.findall(".//result"):
+            # On récupère le PPN nettoyé
+            ppn = result.attrib['ppn']
+            # On l'ajoute à la liste des ppns retrouvés par le web service
+            ppns_connus.append(ppn)
+            # On regarde si une localisation existe pour le PPN 
+            is_located = test_localisation(result.findall(".//library"),rcr)
+            if is_located :
+                logger.debug("{} :: Existe".format(ppn))
+            else :
+                error = Error(  error_ppn = ppn,
+                    error_type = 'LOC_INCONNUE_SUDOC',
+                    error_process = process)
+                error.save()
+                logger.debug("{} :: N'Existe pas".format(ppn))
+        # On identifie les ppns inconnus du SUDOC
