@@ -65,7 +65,7 @@
           {% if cl.search_fields %}
             {% block search %}{% search_form cl %}{% endblock %}
           {% else %}
-            <span class="title"><span class="glyphicon glyphicon-th-list"></span> {{ cl.opts.verbose_name_plural|capfirst }}</span>
+            <span class="title"><span class="glyphicon glyphicon-th-list"></span>{{ cl.opts.verbose_name_plural|capfirst }}</span>
           {% endif %}
           {% block object-tools %}
             {% if has_add_permission %}

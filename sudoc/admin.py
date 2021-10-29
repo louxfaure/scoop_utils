@@ -177,12 +177,11 @@ class ProcessAdmin(admin.ModelAdmin):
                 logger.debug(lines)
                 process.process_num_ppn_mal_formate = Error.objects.filter(error_process=process,error_type='PPN_MAL_FORMATE').count()
                 process.save()
-                #Lancement de l'analyse de recouvrement Alma vers le SUDOC 
+                #Pour l'analyse de recouvrement Alma vers le SUDOC on requête le service de l'abes par lot de 50 PPN 
                 if process.process_job_type == "ALMA_TO_SUDOC" :
                     lines = list(chunks(lines,50))
-                #Lancement de l'analyse de recouvrement Sudoc vers Alma
-                else :
-                    ExecuteJobThread(lines,process).start()
+                #Lancement de l'analyse de recouvrement
+                ExecuteJobThread(lines,process).start()
                 request.session['pid'] = process.id
                 messages.success(request, 'L''analyse de recouvrement a été lancée pour la bibliothèque {}. Vous recevrez un meessage sur {} à la fin du traitement'.format(library, user.email))
                 return HttpResponseRedirect("/admin/sudoc/process/")
