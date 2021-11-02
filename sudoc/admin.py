@@ -101,7 +101,7 @@ class ModesExport:
                 if error :
                     messages.error(request,"Le jeux de résultat n'a pas pu être créé. {}".format(reponse))
                 else :
-                    messages.success(request, 'Un set a été créé')
+                    messages.success(request, 'Le set {} a été créé avec succès'.format(set_name))
 
     export_as_set.short_description = "Créer un jeu de résultat Alma"
 

@@ -1,1 +1,2 @@
-#Click and colect# click_and_collect
+# Scoop Utils
+Plateforme django regroupant plusieurs utilitaires utiles au service de coopération documentaire.  
